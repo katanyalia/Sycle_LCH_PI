@@ -1,11 +1,11 @@
 import Image from "next/image";
 import Link from "next/link";
-import { UserRound } from "lucide-react";
 import { MainNav } from "@/components/layout/MainNav";
 import { LocationStatus } from "@/components/environment/LocationStatus";
+import { AccountLink } from "@/components/layout/AccountLink";
 
 // Header global (wireframe: logo | 4 menu | Lokasi | Akun).
-// Status akun masih placeholder sampai Tahap 5 (autentikasi).
+// Area akun menampilkan nama Member atau tautan Masuk (Tahap 5).
 export function SiteHeader() {
   return (
     <header className="sticky top-0 z-40 border-b bg-card/95 backdrop-blur">
@@ -29,13 +29,7 @@ export function SiteHeader() {
 
         <div className="ml-auto flex min-w-0 items-center gap-1 text-sm md:ml-0">
           <LocationStatus />
-          <Link
-            href="/masuk"
-            className="hidden h-10 items-center gap-1.5 rounded-lg px-3 font-medium hover:bg-secondary md:flex"
-          >
-            <UserRound className="size-4" aria-hidden="true" />
-            Masuk
-          </Link>
+          <AccountLink />
         </div>
       </div>
     </header>
