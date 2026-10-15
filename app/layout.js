@@ -3,6 +3,7 @@ import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { MobileNav } from "@/components/layout/MainNav";
 import { EnvironmentProvider } from "@/context/EnvironmentContext";
+import { PersonalizationProvider } from "@/context/PersonalizationContext";
 import "./globals.css";
 
 // Font LOCKED: Open Sans (Master Draft 1.6).
@@ -37,12 +38,14 @@ export default function RootLayout({ children }) {
           Lompat ke konten utama
         </a>
         <EnvironmentProvider>
+          <PersonalizationProvider>
           <SiteHeader />
           <main id="konten-utama" className="flex-1">
             {children}
           </main>
           <SiteFooter />
           <MobileNav />
+          </PersonalizationProvider>
         </EnvironmentProvider>
       </body>
     </html>
