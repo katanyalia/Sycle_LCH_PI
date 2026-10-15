@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { History, LogIn, UserPlus } from "lucide-react";
-import { PageShell } from "@/components/layout/PageShell";
+import { PageShell, SupportPanel } from "@/components/layout/PageShell";
+import { TrackerFlow } from "@/components/tracker/TrackerFlow";
 import { StatusMessage } from "@/components/feedback/StatusMessage";
-import { PlannedFeature } from "@/components/feedback/PlannedFeature";
 import { Button } from "@/components/ui/button";
 import { getCurrentUser } from "@/lib/auth/session";
 
@@ -48,16 +48,21 @@ export default async function HealthTrackerPage() {
     <PageShell
       eyebrow="Health Tracker"
       title={`Halo${user.displayName ? `, ${user.displayName}` : ""}. Catat pengalaman tubuhmu secara sukarela.`}
+      panel={
+        <SupportPanel title="Privasi catatan">
+          <p>Jawabanmu belum tersimpan sampai kamu memilih Simpan Catatan.</p>
+          <p>Catatan yang disimpan hanya dapat dilihat olehmu.</p>
+          <p>Health Tracker tidak digunakan untuk diagnosis atau membuktikan sebab-akibat.</p>
+          <p>
+            <Link href="/health-tracker/riwayat" className="inline-flex items-center gap-1 font-semibold text-primary-pressed hover:underline">
+              <History className="size-4" aria-hidden="true" />
+              Riwayat catatan
+            </Link>
+          </p>
+        </SupportPanel>
+      }
     >
-      <PlannedFeature stage={6} screens="28–53">
-        Formulir pencatatan, ringkasan, dan penyimpanan catatan belum aktif.
-      </PlannedFeature>
-      <Button asChild variant="outline">
-        <Link href="/health-tracker/riwayat">
-          <History aria-hidden="true" />
-          Riwayat catatan
-        </Link>
-      </Button>
+      <TrackerFlow />
     </PageShell>
   );
 }

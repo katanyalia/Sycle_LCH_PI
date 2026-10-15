@@ -4,6 +4,8 @@ import { SiteFooter } from "@/components/layout/SiteFooter";
 import { MobileNav } from "@/components/layout/MainNav";
 import { EnvironmentProvider } from "@/context/EnvironmentContext";
 import { PersonalizationProvider } from "@/context/PersonalizationContext";
+import { TrackerDraftProvider } from "@/context/TrackerDraftContext";
+import { getCurrentUser } from "@/lib/auth/session";
 import "./globals.css";
 
 // Font LOCKED: Open Sans (Master Draft 1.6).
@@ -27,7 +29,9 @@ export const viewport = {
   themeColor: "#fff8fb",
 };
 
-export default function RootLayout({ children }) {
+export default async function RootLayout({ children }) {
+  // Pemilik draf Tracker: draf dikosongkan bila akun berganti/logout.
+  const user = await getCurrentUser();
   return (
     <html lang="id" className={`${openSans.variable} h-full antialiased`}>
       <body className="flex min-h-full flex-col pb-20 lg:pb-0">
@@ -39,12 +43,14 @@ export default function RootLayout({ children }) {
         </a>
         <EnvironmentProvider>
           <PersonalizationProvider>
+          <TrackerDraftProvider userId={user?.id ?? null}>
           <SiteHeader />
           <main id="konten-utama" className="flex-1">
             {children}
           </main>
           <SiteFooter />
           <MobileNav />
+          </TrackerDraftProvider>
           </PersonalizationProvider>
         </EnvironmentProvider>
       </body>
