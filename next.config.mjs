@@ -1,8 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  /* config options here */
-  cacheComponents: true,
-  partialPrefetching: true,
+  // Indikator dev Next.js disembunyikan agar tidak menutupi navigasi bawah ponsel saat review.
+  devIndicators: false,
+  // cacheComponents & partialPrefetching (bawaan create-next-app) sengaja tidak diaktifkan
+  // agar perilaku data fetching & revalidatePath sama dengan materi mentor.
   turbopack: {
     rules: {
       "*.css": {
