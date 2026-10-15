@@ -8,6 +8,8 @@ import { DisruptionScale } from "@/components/forms/DisruptionScale";
 import { StatusMessage } from "@/components/feedback/StatusMessage";
 import { ConfirmDialog } from "@/components/feedback/ConfirmDialog";
 import { DraftContent } from "@/components/content/DraftContent";
+import { ContentStatus } from "@/components/content/ContentStatus";
+import { ReferenceList } from "@/components/content/ReferenceList";
 import { Button } from "@/components/ui/button";
 
 // Contoh memakai teks pertanyaan asli Master Draft (P-01, P-03) hanya untuk menguji komponen.
@@ -78,6 +80,15 @@ export function ComponentPreview() {
       <DraftContent>
         <p>Contoh wadah konten draf (K-01). Tidak berisi klaim kesehatan.</p>
       </DraftContent>
+
+      <section className="space-y-3 rounded-xl border bg-card p-4" aria-label="Contoh struktur butir panduan">
+        <p className="text-sm font-semibold text-muted-foreground">Contoh struktur butir panduan (teks netral, bukan informasi kesehatan)</p>
+        <ContentStatus item={{ status: "draft" }} />
+        <ContentStatus item={{ status: "approved", approvedAt: "2026-10-20" }} />
+        <p className="font-semibold">Teks langkah ditulis oleh tim di sini.</p>
+        <p className="text-sm text-muted-foreground"><span className="font-semibold text-foreground">Alasan: </span>Alasan singkat ditulis oleh tim di sini.</p>
+        <ReferenceList references={[{ title: "Judul sumber", publisher: "Penerbit", url: "https://example.org" }]} />
+      </section>
 
       <div className="grid gap-3 md:grid-cols-2">
         {STATES.map((state) => (

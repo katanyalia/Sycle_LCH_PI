@@ -1,14 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowLeft, Info, ShieldCheck } from "lucide-react";
+import { ArrowLeft, BookA, Info, ShieldCheck } from "lucide-react";
 import { PageShell, SupportPanel } from "@/components/layout/PageShell";
 import { Button } from "@/components/ui/button";
 import { StatusMessage } from "@/components/feedback/StatusMessage";
-import { PlannedFeature } from "@/components/feedback/PlannedFeature";
 import { IndicatorValue } from "@/components/environment/IndicatorValue";
 import { DATA_TYPE_LABEL, formatDataTime, formatNumber } from "@/lib/environment/format";
 import { INDICATOR_PAGES } from "@/lib/environment/indicatorRoutes";
+import { GUIDANCE_GROUPS } from "@/content/categories";
+import { GLOSSARY } from "@/content/education/glossary";
 import { useEnvironment } from "@/context/EnvironmentContext";
 import { useNow } from "@/hooks/useNow";
 
@@ -54,6 +55,9 @@ export function IndicatorDetail({ slug }) {
   const { snapshot, location } = useEnvironment();
   const now = useNow();
   const page = INDICATOR_PAGES[slug];
+  const guidanceGroup = GUIDANCE_GROUPS.find((group) => group.indicatorPages.includes(slug));
+  const glossaryId = { "suhu-kelembapan": "kelembapan-relatif", "kualitas-udara": "ispu", "indeks-uv": "indeks-uv", "heat-index": "heat-index" }[slug];
+  const glossaryEntry = GLOSSARY.find((entry) => entry.id === glossaryId);
 
   return (
     <PageShell
@@ -82,10 +86,6 @@ export function IndicatorDetail({ slug }) {
           {page.indicators.map((id) => (
             <IndicatorBlock key={id} indicator={snapshot.indicators[id]} place={snapshot.location} now={now} />
           ))}
-          <PlannedFeature stage={3} screens="10">
-            Panduan perlindungan untuk indikator ini akan ditampilkan dari sumber yang sudah ditinjau, atau
-            sebagai konten draf berlabel.
-          </PlannedFeature>
         </>
       )}
       <div className="flex flex-wrap gap-2">
@@ -95,12 +95,20 @@ export function IndicatorDetail({ slug }) {
             Kembali ke Beranda
           </Link>
         </Button>
-        <Button asChild variant="ghost">
-          <Link href="/panduan-umum">
+        <Button asChild>
+          <Link href={`/panduan-umum#${guidanceGroup?.id ?? ""}`}>
             <ShieldCheck aria-hidden="true" />
             Panduan Perlindungan
           </Link>
         </Button>
+        {glossaryEntry && (
+          <Button asChild variant="ghost">
+            <Link href={`/info-edukasi/glosarium#${glossaryEntry.id}`}>
+              <BookA aria-hidden="true" />
+              Pelajari: {glossaryEntry.term}
+            </Link>
+          </Button>
+        )}
       </div>
     </PageShell>
   );

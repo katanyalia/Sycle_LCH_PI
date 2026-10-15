@@ -1,0 +1,76 @@
+// Glosarium (WF-08 screen 64). Definisi diambil dari Master Draft SYCLE V2 (LOCKED) dan Master Wireframe —
+// bukan klaim kesehatan baru. Istilah lain ditambahkan oleh tim mengikuti docs/PANDUAN_KONTEN.md.
+export const GLOSSARY = [
+  {
+    id: "heat-index",
+    term: "Heat Index (indeks panas)",
+    definition:
+      "Ukuran rasa panas dari kombinasi suhu dan kelembapan relatif. Heat Index adalah estimasi rasa panas pada kondisi tertentu, bukan ukuran langsung kondisi tubuh atau penilaian kesehatan pribadi.",
+    note: "Heat Index bukan suhu tubuh, diagnosis stres panas, indeks UV, ukuran paparan pribadi lengkap, atau skor risiko medis individual. SYCLE menghitungnya dengan metode NWS/NOAA.",
+    basis: "Master Draft 6.2.1 & 6.2.4",
+    related: ["kelembapan-relatif"],
+  },
+  {
+    id: "ispu",
+    term: "ISPU",
+    definition: "Indeks Standar Pencemar Udara Indonesia.",
+    note: "ISPU dan US AQI tidak identik. SYCLE tidak mengonversi US AQI menjadi ISPU.",
+    basis: "Master Draft 6.3.3; Master Wireframe screen 64",
+    related: ["us-aqi"],
+  },
+  {
+    id: "us-aqi",
+    term: "US AQI",
+    definition: "Indeks kualitas udara berdasarkan standar Amerika Serikat.",
+    note: "Di SYCLE, US AQI hanya dipakai sebagai data cadangan bila ISPU tidak tersedia, dan selalu dilabeli US AQI.",
+    basis: "Master Draft 6.3.3",
+    related: ["ispu", "data-cadangan"],
+  },
+  {
+    id: "indeks-uv",
+    term: "Indeks UV",
+    definition: "Indeks yang menggambarkan intensitas radiasi ultraviolet (UV).",
+    note: "Nilai indeks UV bukan ukuran paparan pribadimu.",
+    basis: "Master Wireframe screen 08 & 64",
+    related: [],
+  },
+  {
+    id: "kelembapan-relatif",
+    term: "Kelembapan relatif",
+    definition: "Salah satu input perhitungan Heat Index bersama suhu udara; ditampilkan dalam persen (%).",
+    basis: "Master Draft 6.2.1 & 6.1.4",
+    related: ["heat-index"],
+  },
+  {
+    id: "prakiraan",
+    term: "Prakiraan",
+    definition: "Jenis data yang memperkirakan kondisi untuk waktu tertentu. Di SYCLE, suhu dan kelembapan dari BMKG berupa prakiraan per 3 jam.",
+    note: "Prakiraan bukan hasil pengukuran langsung.",
+    basis: "Master Draft 6.1.4 (jenis data); Data Prakiraan Cuaca Terbuka BMKG",
+    related: ["pengamatan", "data-model"],
+  },
+  {
+    id: "pengamatan",
+    term: "Pengamatan stasiun",
+    definition: "Jenis data hasil pengukuran di stasiun pemantau. Di SYCLE, ISPU berasal dari stasiun pemantau kualitas udara.",
+    note: "Data stasiun tidak sama dengan paparan pribadimu.",
+    basis: "Master Draft 6.1.4 & 6.3.4",
+    related: ["ispu"],
+  },
+  {
+    id: "data-model",
+    term: "Data model",
+    definition: "Jenis data hasil perhitungan model cuaca atau kualitas udara, bukan pengukuran langsung di lokasimu.",
+    note: "Di SYCLE, indeks UV dan data cadangan dari Open-Meteo merupakan data model.",
+    basis: "Master Draft 6.1.4",
+    related: ["data-cadangan"],
+  },
+  {
+    id: "data-cadangan",
+    term: "Data cadangan",
+    definition: "Data dari sumber lain yang dipakai ketika sumber utama suatu indikator tidak tersedia.",
+    note: "Data cadangan selalu diberi label dan tidak disamakan dengan sumber utama.",
+    basis: "Master Draft 6.3.1–6.3.3",
+    related: ["us-aqi"],
+  },
+];
