@@ -2,6 +2,7 @@ import { Open_Sans } from "next/font/google";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { MobileNav } from "@/components/layout/MainNav";
+import { EnvironmentProvider } from "@/context/EnvironmentContext";
 import "./globals.css";
 
 // Font LOCKED: Open Sans (Master Draft 1.6).
@@ -35,12 +36,14 @@ export default function RootLayout({ children }) {
         >
           Lompat ke konten utama
         </a>
-        <SiteHeader />
-        <main id="konten-utama" className="flex-1">
-          {children}
-        </main>
-        <SiteFooter />
-        <MobileNav />
+        <EnvironmentProvider>
+          <SiteHeader />
+          <main id="konten-utama" className="flex-1">
+            {children}
+          </main>
+          <SiteFooter />
+          <MobileNav />
+        </EnvironmentProvider>
       </body>
     </html>
   );

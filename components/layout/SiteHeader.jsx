@@ -1,10 +1,11 @@
 import Image from "next/image";
 import Link from "next/link";
-import { MapPin, UserRound } from "lucide-react";
+import { UserRound } from "lucide-react";
 import { MainNav } from "@/components/layout/MainNav";
+import { LocationStatus } from "@/components/environment/LocationStatus";
 
 // Header global (wireframe: logo | 4 menu | Lokasi | Akun).
-// Status lokasi & akun masih placeholder: diisi pada Tahap 2 (lokasi) dan Tahap 5 (autentikasi).
+// Status akun masih placeholder sampai Tahap 5 (autentikasi).
 export function SiteHeader() {
   return (
     <header className="sticky top-0 z-40 border-b bg-card/95 backdrop-blur">
@@ -26,11 +27,8 @@ export function SiteHeader() {
           <MainNav />
         </div>
 
-        <div className="ml-auto flex items-center gap-1 text-sm md:ml-0">
-          <span className="flex h-10 items-center gap-1.5 rounded-lg px-2 text-muted-foreground">
-            <MapPin className="size-4" aria-hidden="true" />
-            <span>Lokasi belum dipilih</span>
-          </span>
+        <div className="ml-auto flex min-w-0 items-center gap-1 text-sm md:ml-0">
+          <LocationStatus />
           <Link
             href="/masuk"
             className="hidden h-10 items-center gap-1.5 rounded-lg px-3 font-medium hover:bg-secondary md:flex"
