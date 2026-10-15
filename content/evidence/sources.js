@@ -2,6 +2,7 @@
 // Ini katalog KANDIDAT: status rilis semua sumber masih "not_granted". Kode `id` (E-xx) dipakai di berkas
 // konten untuk menunjuk referensi, tetapi TIDAK ditampilkan di antarmuka (Master Draft 5.7).
 // Jangan menyunting manual; perbarui dari CSV master bila tim mengubah statusnya.
+// Kolom tambahan (Info & Edukasi): forQuestions, populationStudy, sourceType, topics, usageNote — dari CSV yang sama.
 export const EVIDENCE_SOURCES = [
   {
     "id": "E01",
@@ -11,8 +12,16 @@ export const EVIDENCE_SOURCES = [
     "group": "KONDISI_DAN_PANDUAN",
     "forGuidance": true,
     "forEducation": true,
+    "forQuestions": true,
     "safetyDraft": false,
     "internal": false,
+    "populationStudy": false,
+    "sourceType": "Halaman informasi resmi",
+    "topics": [
+      "kehamilan",
+      "panas"
+    ],
+    "usageNote": "WHO; gunakan hanya klaim yang nanti disetujui",
     "releaseStatus": "not_granted"
   },
   {
@@ -23,8 +32,16 @@ export const EVIDENCE_SOURCES = [
     "group": "KONDISI_DAN_PANDUAN",
     "forGuidance": true,
     "forEducation": true,
+    "forQuestions": true,
     "safetyDraft": false,
     "internal": false,
+    "populationStudy": false,
+    "sourceType": "Halaman informasi resmi",
+    "topics": [
+      "kehamilan",
+      "panas"
+    ],
+    "usageNote": "CDC; jangan menyimpulkan risiko individu",
     "releaseStatus": "not_granted"
   },
   {
@@ -35,8 +52,17 @@ export const EVIDENCE_SOURCES = [
     "group": "INFO_DAN_EDUKASI",
     "forGuidance": false,
     "forEducation": true,
+    "forQuestions": true,
     "safetyDraft": false,
     "internal": false,
+    "populationStudy": false,
+    "sourceType": "Ringkasan institusi",
+    "topics": [
+      "kehamilan",
+      "kesehatan_reproduksi",
+      "iklim"
+    ],
+    "usageNote": "Ringkasan institusi; batas akses sumber",
     "releaseStatus": "not_granted"
   },
   {
@@ -47,8 +73,17 @@ export const EVIDENCE_SOURCES = [
     "group": "KONDISI_DAN_PANDUAN",
     "forGuidance": true,
     "forEducation": true,
+    "forQuestions": true,
     "safetyDraft": false,
     "internal": false,
+    "populationStudy": true,
+    "sourceType": "Artikel ilmiah (teks lengkap)",
+    "topics": [
+      "kehamilan",
+      "panas",
+      "hasil_kehamilan"
+    ],
+    "usageNote": "Bukan kalkulator risiko personal",
     "releaseStatus": "not_granted"
   },
   {
@@ -59,8 +94,17 @@ export const EVIDENCE_SOURCES = [
     "group": "INFO_DAN_EDUKASI",
     "forGuidance": false,
     "forEducation": true,
+    "forQuestions": true,
     "safetyDraft": false,
     "internal": false,
+    "populationStudy": true,
+    "sourceType": "Artikel ilmiah (abstrak)",
+    "topics": [
+      "kehamilan",
+      "panas",
+      "hasil_kehamilan"
+    ],
+    "usageNote": "Abstrak terindeks; cek full text",
     "releaseStatus": "not_granted"
   },
   {
@@ -71,8 +115,17 @@ export const EVIDENCE_SOURCES = [
     "group": "KONDISI_DAN_PANDUAN",
     "forGuidance": true,
     "forEducation": true,
+    "forQuestions": true,
     "safetyDraft": false,
     "internal": false,
+    "populationStudy": true,
+    "sourceType": "Artikel ilmiah (teks lengkap)",
+    "topics": [
+      "kehamilan",
+      "PM2.5",
+      "hipertensi"
+    ],
+    "usageNote": "Tidak mengaitkan PM2.5 dengan gejala individu",
     "releaseStatus": "not_granted"
   },
   {
@@ -83,8 +136,17 @@ export const EVIDENCE_SOURCES = [
     "group": "INFO_DAN_EDUKASI",
     "forGuidance": false,
     "forEducation": true,
+    "forQuestions": true,
     "safetyDraft": false,
     "internal": false,
+    "populationStudy": true,
+    "sourceType": "Artikel ilmiah (abstrak)",
+    "topics": [
+      "kehamilan",
+      "polusi_udara",
+      "hipertensi"
+    ],
+    "usageNote": "Tidak untuk keputusan medis individual",
     "releaseStatus": "not_granted"
   },
   {
@@ -95,8 +157,18 @@ export const EVIDENCE_SOURCES = [
     "group": "INFO_DAN_EDUKASI",
     "forGuidance": false,
     "forEducation": true,
+    "forQuestions": true,
     "safetyDraft": false,
     "internal": false,
+    "populationStudy": false,
+    "sourceType": "Publikasi/pedoman",
+    "topics": [
+      "iklim",
+      "ibu",
+      "anak",
+      "kebijakan"
+    ],
+    "usageNote": "Bukan panduan klinis langsung",
     "releaseStatus": "not_granted"
   },
   {
@@ -107,8 +179,16 @@ export const EVIDENCE_SOURCES = [
     "group": "INFO_DAN_EDUKASI",
     "forGuidance": false,
     "forEducation": true,
+    "forQuestions": true,
     "safetyDraft": false,
     "internal": false,
+    "populationStudy": false,
+    "sourceType": "Artikel ilmiah (abstrak)",
+    "topics": [
+      "menstruasi",
+      "termoregulasi"
+    ],
+    "usageNote": "Jangan memprediksi respons panas per individu",
     "releaseStatus": "not_granted"
   },
   {
@@ -119,8 +199,16 @@ export const EVIDENCE_SOURCES = [
     "group": "KONDISI_DAN_PANDUAN",
     "forGuidance": true,
     "forEducation": true,
+    "forQuestions": true,
     "safetyDraft": false,
     "internal": false,
+    "populationStudy": false,
+    "sourceType": "Halaman informasi resmi",
+    "topics": [
+      "menstruasi",
+      "kesehatan_menstruasi"
+    ],
+    "usageNote": "Tidak mendiagnosis gejala menstruasi",
     "releaseStatus": "not_granted"
   },
   {
@@ -131,8 +219,17 @@ export const EVIDENCE_SOURCES = [
     "group": "INFO_DAN_EDUKASI",
     "forGuidance": false,
     "forEducation": true,
+    "forQuestions": true,
     "safetyDraft": false,
     "internal": false,
+    "populationStudy": true,
+    "sourceType": "Artikel ilmiah (abstrak)",
+    "topics": [
+      "menstruasi",
+      "panas",
+      "olahraga"
+    ],
+    "usageNote": "Jangan menyimpulkan fase siklus dari suhu",
     "releaseStatus": "not_granted"
   },
   {
@@ -143,8 +240,16 @@ export const EVIDENCE_SOURCES = [
     "group": "INFO_DAN_EDUKASI",
     "forGuidance": false,
     "forEducation": true,
+    "forQuestions": true,
     "safetyDraft": false,
     "internal": false,
+    "populationStudy": true,
+    "sourceType": "Artikel ilmiah (abstrak)",
+    "topics": [
+      "menstruasi",
+      "polusi_udara"
+    ],
+    "usageNote": "Studi observasional; tidak membuktikan kausalitas",
     "releaseStatus": "not_granted"
   },
   {
@@ -155,8 +260,16 @@ export const EVIDENCE_SOURCES = [
     "group": "INFO_DAN_EDUKASI",
     "forGuidance": false,
     "forEducation": true,
+    "forQuestions": true,
     "safetyDraft": false,
     "internal": false,
+    "populationStudy": true,
+    "sourceType": "Artikel ilmiah (abstrak)",
+    "topics": [
+      "menopause",
+      "panas"
+    ],
+    "usageNote": "Jangan mengaitkan gejala pribadi dengan suhu",
     "releaseStatus": "not_granted"
   },
   {
@@ -167,8 +280,15 @@ export const EVIDENCE_SOURCES = [
     "group": "INFO_DAN_EDUKASI",
     "forGuidance": false,
     "forEducation": true,
+    "forQuestions": true,
     "safetyDraft": false,
     "internal": false,
+    "populationStudy": false,
+    "sourceType": "Halaman informasi resmi",
+    "topics": [
+      "menopause"
+    ],
+    "usageNote": "Topik edukasi; bukan cabang personalisasi MVP",
     "releaseStatus": "not_granted"
   },
   {
@@ -179,8 +299,16 @@ export const EVIDENCE_SOURCES = [
     "group": "INFO_DAN_EDUKASI",
     "forGuidance": false,
     "forEducation": true,
+    "forQuestions": true,
     "safetyDraft": false,
     "internal": false,
+    "populationStudy": false,
+    "sourceType": "Pedoman resmi",
+    "topics": [
+      "menopause",
+      "pedoman"
+    ],
+    "usageNote": "Jangan menghasilkan terapi atau diagnosis",
     "releaseStatus": "not_granted"
   },
   {
@@ -191,8 +319,17 @@ export const EVIDENCE_SOURCES = [
     "group": "KONDISI_DAN_PANDUAN",
     "forGuidance": true,
     "forEducation": true,
+    "forQuestions": true,
     "safetyDraft": false,
     "internal": false,
+    "populationStudy": false,
+    "sourceType": "Halaman informasi resmi",
+    "topics": [
+      "panas",
+      "indeks_panas",
+      "perlindungan"
+    ],
+    "usageNote": "Bukan pengganti perhitungan Heat Index",
     "releaseStatus": "not_granted"
   },
   {
@@ -203,8 +340,16 @@ export const EVIDENCE_SOURCES = [
     "group": "KONDISI_DAN_PANDUAN",
     "forGuidance": true,
     "forEducation": true,
+    "forQuestions": true,
     "safetyDraft": false,
     "internal": false,
+    "populationStudy": false,
+    "sourceType": "Halaman informasi resmi",
+    "topics": [
+      "panas",
+      "perlindungan"
+    ],
+    "usageNote": "Tidak untuk penilaian risiko klinis personal",
     "releaseStatus": "not_granted"
   },
   {
@@ -215,8 +360,17 @@ export const EVIDENCE_SOURCES = [
     "group": "KONDISI_DAN_PANDUAN",
     "forGuidance": true,
     "forEducation": true,
+    "forQuestions": true,
     "safetyDraft": false,
     "internal": false,
+    "populationStudy": false,
+    "sourceType": "Halaman data",
+    "topics": [
+      "PM2.5",
+      "kualitas_udara",
+      "data"
+    ],
+    "usageNote": "Halaman data; bukan evidence klinis",
     "releaseStatus": "not_granted"
   },
   {
@@ -227,8 +381,16 @@ export const EVIDENCE_SOURCES = [
     "group": "INTERNAL",
     "forGuidance": false,
     "forEducation": false,
+    "forQuestions": false,
     "safetyDraft": false,
     "internal": true,
+    "populationStudy": false,
+    "sourceType": "Publikasi/pedoman",
+    "topics": [
+      "kualitas_udara",
+      "komunikasi"
+    ],
+    "usageNote": "HOLD: rincian dokumen belum diverifikasi",
     "releaseStatus": "not_granted"
   },
   {
@@ -239,8 +401,17 @@ export const EVIDENCE_SOURCES = [
     "group": "INFO_DAN_EDUKASI",
     "forGuidance": false,
     "forEducation": true,
+    "forQuestions": true,
     "safetyDraft": false,
     "internal": false,
+    "populationStudy": false,
+    "sourceType": "Dokumen kebijakan",
+    "topics": [
+      "iklim",
+      "kebijakan_kesehatan",
+      "Indonesia"
+    ],
+    "usageNote": "Hanya konteks kebijakan, bukan saran personal",
     "releaseStatus": "not_granted"
   },
   {
@@ -251,8 +422,17 @@ export const EVIDENCE_SOURCES = [
     "group": "INFO_DAN_EDUKASI",
     "forGuidance": false,
     "forEducation": true,
+    "forQuestions": true,
     "safetyDraft": true,
     "internal": false,
+    "populationStudy": false,
+    "sourceType": "Halaman informasi resmi",
+    "topics": [
+      "menstruasi",
+      "nyeri",
+      "keselamatan"
+    ],
+    "usageNote": "Pesan keselamatan perlu review klinis",
     "releaseStatus": "not_granted"
   },
   {
@@ -263,8 +443,16 @@ export const EVIDENCE_SOURCES = [
     "group": "INFO_DAN_EDUKASI",
     "forGuidance": false,
     "forEducation": true,
+    "forQuestions": true,
     "safetyDraft": false,
     "internal": false,
+    "populationStudy": false,
+    "sourceType": "Halaman informasi resmi",
+    "topics": [
+      "menstruasi",
+      "nyeri"
+    ],
+    "usageNote": "Bukan diagnosis penyebab nyeri",
     "releaseStatus": "not_granted"
   },
   {
@@ -275,8 +463,17 @@ export const EVIDENCE_SOURCES = [
     "group": "INFO_DAN_EDUKASI",
     "forGuidance": false,
     "forEducation": true,
+    "forQuestions": true,
     "safetyDraft": true,
     "internal": false,
+    "populationStudy": false,
+    "sourceType": "Halaman informasi resmi",
+    "topics": [
+      "menstruasi",
+      "perdarahan",
+      "keselamatan"
+    ],
+    "usageNote": "Pesan keselamatan perlu review klinis",
     "releaseStatus": "not_granted"
   },
   {
@@ -287,8 +484,16 @@ export const EVIDENCE_SOURCES = [
     "group": "INFO_DAN_EDUKASI",
     "forGuidance": false,
     "forEducation": true,
+    "forQuestions": true,
     "safetyDraft": true,
     "internal": false,
+    "populationStudy": false,
+    "sourceType": "Halaman informasi resmi",
+    "topics": [
+      "pascapersalinan",
+      "keselamatan"
+    ],
+    "usageNote": "Pascapersalinan untuk edukasi, bukan cabang MVP",
     "releaseStatus": "not_granted"
   },
   {
@@ -299,8 +504,16 @@ export const EVIDENCE_SOURCES = [
     "group": "INFO_DAN_EDUKASI",
     "forGuidance": false,
     "forEducation": true,
+    "forQuestions": true,
     "safetyDraft": true,
     "internal": false,
+    "populationStudy": false,
+    "sourceType": "Halaman informasi resmi",
+    "topics": [
+      "pascapersalinan",
+      "keselamatan"
+    ],
+    "usageNote": "Pesan keselamatan perlu review klinis",
     "releaseStatus": "not_granted"
   },
   {
@@ -311,8 +524,15 @@ export const EVIDENCE_SOURCES = [
     "group": "INFO_DAN_EDUKASI",
     "forGuidance": false,
     "forEducation": true,
+    "forQuestions": true,
     "safetyDraft": false,
     "internal": false,
+    "populationStudy": false,
+    "sourceType": "Halaman informasi resmi",
+    "topics": [
+      "menyusui"
+    ],
+    "usageNote": "Tidak membuat saran medis spesifik",
     "releaseStatus": "not_granted"
   },
   {
@@ -323,8 +543,17 @@ export const EVIDENCE_SOURCES = [
     "group": "KONDISI_DAN_PANDUAN",
     "forGuidance": true,
     "forEducation": true,
+    "forQuestions": true,
     "safetyDraft": false,
     "internal": false,
+    "populationStudy": false,
+    "sourceType": "Halaman informasi resmi",
+    "topics": [
+      "menyusui",
+      "panas",
+      "hidrasi"
+    ],
+    "usageNote": "Cek konteks ibu/bayi dan batas rekomendasi",
     "releaseStatus": "not_granted"
   },
   {
@@ -335,8 +564,15 @@ export const EVIDENCE_SOURCES = [
     "group": "INFO_DAN_EDUKASI",
     "forGuidance": false,
     "forEducation": true,
+    "forQuestions": true,
     "safetyDraft": false,
     "internal": false,
+    "populationStudy": false,
+    "sourceType": "Halaman informasi resmi",
+    "topics": [
+      "perimenopause"
+    ],
+    "usageNote": "Bukan cabang personalisasi MVP",
     "releaseStatus": "not_granted"
   },
   {
@@ -347,8 +583,16 @@ export const EVIDENCE_SOURCES = [
     "group": "INFO_DAN_EDUKASI",
     "forGuidance": false,
     "forEducation": true,
+    "forQuestions": true,
     "safetyDraft": false,
     "internal": false,
+    "populationStudy": false,
+    "sourceType": "Halaman informasi resmi",
+    "topics": [
+      "perimenopause",
+      "menopause"
+    ],
+    "usageNote": "Tidak mendiagnosis menopause",
     "releaseStatus": "not_granted"
   },
   {
@@ -359,8 +603,16 @@ export const EVIDENCE_SOURCES = [
     "group": "INFO_DAN_EDUKASI",
     "forGuidance": false,
     "forEducation": true,
+    "forQuestions": true,
     "safetyDraft": false,
     "internal": false,
+    "populationStudy": false,
+    "sourceType": "Halaman informasi resmi",
+    "topics": [
+      "keringat_malam",
+      "menopause"
+    ],
+    "usageNote": "Tidak menentukan penyebab keluhan",
     "releaseStatus": "not_granted"
   },
   {
@@ -371,8 +623,17 @@ export const EVIDENCE_SOURCES = [
     "group": "INTERNAL",
     "forGuidance": false,
     "forEducation": false,
+    "forQuestions": false,
     "safetyDraft": false,
     "internal": true,
+    "populationStudy": false,
+    "sourceType": "Artikel ilmiah (teks lengkap)",
+    "topics": [
+      "Indonesia",
+      "Malaysia",
+      "riset_partisipatif"
+    ],
+    "usageNote": "Hanya konteks desain/riset produk",
     "releaseStatus": "not_granted"
   },
   {
@@ -383,8 +644,16 @@ export const EVIDENCE_SOURCES = [
     "group": "INTERNAL",
     "forGuidance": false,
     "forEducation": false,
+    "forQuestions": false,
     "safetyDraft": false,
     "internal": true,
+    "populationStudy": false,
+    "sourceType": "Artikel ilmiah (abstrak)",
+    "topics": [
+      "Indonesia",
+      "kebutuhan_informasi"
+    ],
+    "usageNote": "Hanya konteks desain/riset produk",
     "releaseStatus": "not_granted"
   },
   {
@@ -395,8 +664,17 @@ export const EVIDENCE_SOURCES = [
     "group": "KONDISI_DAN_PANDUAN",
     "forGuidance": true,
     "forEducation": true,
+    "forQuestions": true,
     "safetyDraft": false,
     "internal": false,
+    "populationStudy": false,
+    "sourceType": "Publikasi/pedoman",
+    "topics": [
+      "PM2.5",
+      "polusi_udara",
+      "pedoman"
+    ],
+    "usageNote": "Pedoman bukan nilai AQI real-time",
     "releaseStatus": "not_granted"
   },
   {
@@ -407,8 +685,16 @@ export const EVIDENCE_SOURCES = [
     "group": "KONDISI_DAN_PANDUAN",
     "forGuidance": true,
     "forEducation": true,
+    "forQuestions": true,
     "safetyDraft": false,
     "internal": false,
+    "populationStudy": false,
+    "sourceType": "Halaman informasi resmi",
+    "topics": [
+      "UV",
+      "radiasi_matahari"
+    ],
+    "usageNote": "Nilai UV aktual tetap dari API tervalidasi",
     "releaseStatus": "not_granted"
   },
   {
@@ -419,8 +705,16 @@ export const EVIDENCE_SOURCES = [
     "group": "INTERNAL",
     "forGuidance": false,
     "forEducation": false,
+    "forQuestions": false,
     "safetyDraft": false,
     "internal": true,
+    "populationStudy": false,
+    "sourceType": "Halaman informasi resmi",
+    "topics": [
+      "pengukuran_gejala",
+      "metodologi"
+    ],
+    "usageNote": "Bukan sumber edukasi atau panduan publik",
     "releaseStatus": "not_granted"
   },
   {
@@ -431,8 +725,16 @@ export const EVIDENCE_SOURCES = [
     "group": "KONDISI_DAN_PANDUAN",
     "forGuidance": true,
     "forEducation": true,
+    "forQuestions": true,
     "safetyDraft": false,
     "internal": false,
+    "populationStudy": false,
+    "sourceType": "Halaman informasi resmi",
+    "topics": [
+      "polusi_udara",
+      "kesehatan"
+    ],
+    "usageNote": "Tidak menentukan penyebab gejala pengguna",
     "releaseStatus": "not_granted"
   },
   {
@@ -443,8 +745,16 @@ export const EVIDENCE_SOURCES = [
     "group": "KONDISI_DAN_PANDUAN",
     "forGuidance": true,
     "forEducation": true,
+    "forQuestions": true,
     "safetyDraft": false,
     "internal": false,
+    "populationStudy": false,
+    "sourceType": "Halaman informasi resmi",
+    "topics": [
+      "polusi_udara",
+      "perlindungan"
+    ],
+    "usageNote": "Tindakan hanya setelah klaim disetujui",
     "releaseStatus": "not_granted"
   },
   {
@@ -455,8 +765,16 @@ export const EVIDENCE_SOURCES = [
     "group": "KONDISI_DAN_PANDUAN",
     "forGuidance": true,
     "forEducation": true,
+    "forQuestions": true,
     "safetyDraft": false,
     "internal": false,
+    "populationStudy": false,
+    "sourceType": "Halaman informasi resmi",
+    "topics": [
+      "UV",
+      "perlindungan_matahari"
+    ],
+    "usageNote": "Tidak menyimpulkan risiko individu",
     "releaseStatus": "not_granted"
   },
   {
@@ -467,8 +785,16 @@ export const EVIDENCE_SOURCES = [
     "group": "INFO_DAN_EDUKASI",
     "forGuidance": false,
     "forEducation": true,
+    "forQuestions": true,
     "safetyDraft": false,
     "internal": false,
+    "populationStudy": false,
+    "sourceType": "Halaman informasi resmi",
+    "topics": [
+      "menyusui",
+      "pertanyaan_umum"
+    ],
+    "usageNote": "Jangan menambahkan nasihat klinis",
     "releaseStatus": "not_granted"
   },
   {
@@ -479,8 +805,17 @@ export const EVIDENCE_SOURCES = [
     "group": "SAFETY_INTERNAL",
     "forGuidance": false,
     "forEducation": true,
+    "forQuestions": true,
     "safetyDraft": true,
     "internal": false,
+    "populationStudy": false,
+    "sourceType": "Halaman informasi resmi",
+    "topics": [
+      "kehamilan",
+      "pascapersalinan",
+      "tanda_bahaya"
+    ],
+    "usageNote": "Perlu review klinis sebelum aturan keselamatan aktif",
     "releaseStatus": "not_granted"
   },
   {
@@ -491,8 +826,17 @@ export const EVIDENCE_SOURCES = [
     "group": "SAFETY_INTERNAL",
     "forGuidance": true,
     "forEducation": true,
+    "forQuestions": true,
     "safetyDraft": true,
     "internal": false,
+    "populationStudy": false,
+    "sourceType": "Halaman informasi resmi",
+    "topics": [
+      "panas",
+      "penyakit_terkait_panas",
+      "tanda_bahaya"
+    ],
+    "usageNote": "Perlu review klinis sebelum aturan keselamatan aktif",
     "releaseStatus": "not_granted"
   },
   {
@@ -503,8 +847,17 @@ export const EVIDENCE_SOURCES = [
     "group": "KONDISI_DAN_PANDUAN",
     "forGuidance": true,
     "forEducation": true,
+    "forQuestions": true,
     "safetyDraft": false,
     "internal": false,
+    "populationStudy": false,
+    "sourceType": "Halaman informasi resmi",
+    "topics": [
+      "masker",
+      "polusi_udara",
+      "perlindungan"
+    ],
+    "usageNote": "Periksa jenis masker dan konteks pengguna",
     "releaseStatus": "not_granted"
   },
   {
@@ -515,8 +868,16 @@ export const EVIDENCE_SOURCES = [
     "group": "KONDISI_DAN_PANDUAN",
     "forGuidance": true,
     "forEducation": true,
+    "forQuestions": true,
     "safetyDraft": false,
     "internal": false,
+    "populationStudy": false,
+    "sourceType": "Halaman informasi resmi",
+    "topics": [
+      "asap_kebakaran",
+      "polusi_udara"
+    ],
+    "usageNote": "Tidak otomatis relevan dengan kondisi lokal",
     "releaseStatus": "not_granted"
   },
   {
@@ -527,8 +888,16 @@ export const EVIDENCE_SOURCES = [
     "group": "INFO_DAN_EDUKASI",
     "forGuidance": false,
     "forEducation": true,
+    "forQuestions": true,
     "safetyDraft": false,
     "internal": false,
+    "populationStudy": true,
+    "sourceType": "Halaman informasi resmi",
+    "topics": [
+      "polusi_udara",
+      "cadangan_ovarium"
+    ],
+    "usageNote": "Tidak menilai kesuburan individu",
     "releaseStatus": "not_granted"
   },
   {
@@ -539,8 +908,17 @@ export const EVIDENCE_SOURCES = [
     "group": "INTERNAL",
     "forGuidance": false,
     "forEducation": false,
+    "forQuestions": false,
     "safetyDraft": false,
     "internal": true,
+    "populationStudy": false,
+    "sourceType": "Halaman informasi resmi",
+    "topics": [
+      "polusi_udara",
+      "kesuburan",
+      "metodologi"
+    ],
+    "usageNote": "Metode studi saja, bukan panduan pengguna",
     "releaseStatus": "not_granted"
   },
   {
@@ -551,8 +929,17 @@ export const EVIDENCE_SOURCES = [
     "group": "INFO_DAN_EDUKASI",
     "forGuidance": false,
     "forEducation": true,
+    "forQuestions": true,
     "safetyDraft": false,
     "internal": false,
+    "populationStudy": true,
+    "sourceType": "Artikel ilmiah (ringkasan)",
+    "topics": [
+      "kehamilan",
+      "panas",
+      "hasil_kehamilan"
+    ],
+    "usageNote": "Bukti lingkup; bukan risiko individual",
     "releaseStatus": "not_granted"
   }
 ];

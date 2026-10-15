@@ -4,6 +4,7 @@ import { useId, useState } from "react";
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { DraftBadge } from "@/components/content/DraftContent";
 
 const normalize = (text) => text.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
 
@@ -34,12 +35,14 @@ export function GlossaryList({ entries }) {
           <div key={entry.id} id={entry.id} className="scroll-mt-24 space-y-2 rounded-xl border bg-card p-4">
             <dt className="text-lg font-semibold">{entry.term}</dt>
             <dd className="space-y-2">
+              {entry.draft && <DraftBadge />}
               <p>{entry.definition}</p>
               {entry.note && <p className="text-sm text-muted-foreground">{entry.note}</p>}
-              {entry.related.length > 0 && (
+              {entry.draft && entry.basis && <p className="text-xs text-muted-foreground">Dasar: {entry.basis}</p>}
+              {entry.related.some((relatedId) => byId[relatedId]) && (
                 <p className="text-sm">
                   Lihat juga:{" "}
-                  {entry.related.map((relatedId, index) => (
+                  {entry.related.filter((relatedId) => byId[relatedId]).map((relatedId, index) => (
                     <span key={relatedId}>
                       {index > 0 && ", "}
                       <a href={`#${relatedId}`} className="font-semibold text-primary-pressed hover:underline" onClick={() => setQuery("")}>

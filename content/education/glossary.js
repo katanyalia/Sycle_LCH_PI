@@ -1,5 +1,6 @@
 // Glosarium (WF-08 screen 64). Definisi diambil dari Master Draft SYCLE V2 (LOCKED) dan Master Wireframe —
 // bukan klaim kesehatan baru. Istilah lain ditambahkan oleh tim mengikuti docs/PANDUAN_KONTEN.md.
+// Istilah berpenanda `draft: true` adalah draf demonstrasi (E-1): tampil berlabel dan ikut sakelar K-01.
 export const GLOSSARY = [
   {
     id: "heat-index",
@@ -72,5 +73,65 @@ export const GLOSSARY = [
     note: "Data cadangan selalu diberi label dan tidak disamakan dengan sumber utama.",
     basis: "Master Draft 6.3.1–6.3.3",
     related: ["us-aqi"],
+  },
+  // ---- E-1: istilah tambahan untuk topik Info & Edukasi — DRAF DEMONSTRASI (Claude), perlu ditinjau tim.
+  {
+    id: "pm25",
+    term: "PM2.5",
+    definition: "Partikel di udara yang berukuran 2,5 mikrometer atau lebih kecil. Konsentrasinya biasanya ditulis dalam µg/m³ (mikrogram per meter kubik).",
+    note: "Angka PM2.5 tidak sama dengan nilai ISPU atau US AQI; ketiganya memakai satuan dan cara hitung yang berbeda.",
+    basis: "BMKG — Konsentrasi Partikulat (PM2.5)",
+    related: ["ispu", "us-aqi"],
+    draft: true,
+  },
+  {
+    id: "dehidrasi",
+    term: "Dehidrasi",
+    definition: "Keadaan ketika tubuh kekurangan cairan. Saat cuaca panas, tubuh kehilangan cairan lewat keringat.",
+    note: "CDC menyebut warna air seni yang kuning muda atau jernih umumnya menandakan cairan tubuh cukup.",
+    basis: "CDC — About Heat and Your Health; Heat and Pregnancy",
+    related: ["heat-index"],
+    draft: true,
+  },
+  {
+    id: "dismenore",
+    term: "Dismenore",
+    definition: "Istilah medis untuk nyeri haid.",
+    basis: "Cleveland Clinic — Dysmenorrhea (Menstrual Cramps)",
+    related: ["fase-luteal"],
+    draft: true,
+  },
+  {
+    id: "fase-luteal",
+    term: "Fase luteal",
+    definition: "Bagian siklus menstruasi setelah ovulasi, ketika kadar hormon progesteron tinggi.",
+    basis: "Temperature regulation in women: Effects of the menstrual cycle",
+    related: ["dismenore"],
+    draft: true,
+  },
+  {
+    id: "studi-populasi",
+    term: "Studi populasi",
+    definition: "Penelitian yang mengamati kelompok besar orang. Hasilnya menggambarkan kecenderungan pada kelompok, bukan kepastian bagi setiap orang.",
+    note: "Karena itu SYCLE tidak memakai temuan populasi untuk menjelaskan keluhan pribadi.",
+    basis: "Master Draft SYCLE V2 (aturan temuan populasi vs individu)",
+    related: ["tinjauan-sistematis", "meta-analisis"],
+    draft: true,
+  },
+  {
+    id: "tinjauan-sistematis",
+    term: "Tinjauan sistematis",
+    definition: "Penelitian yang mengumpulkan dan menilai banyak penelitian sebelumnya tentang satu pertanyaan dengan cara yang terencana dan dapat diulang.",
+    basis: "Definisi metodologi penelitian umum",
+    related: ["meta-analisis", "studi-populasi"],
+    draft: true,
+  },
+  {
+    id: "meta-analisis",
+    term: "Meta-analisis",
+    definition: "Cara menggabungkan hasil angka dari beberapa penelitian sejenis untuk melihat kecenderungan keseluruhan.",
+    basis: "Definisi metodologi penelitian umum",
+    related: ["tinjauan-sistematis"],
+    draft: true,
   },
 ];
