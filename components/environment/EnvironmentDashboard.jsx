@@ -70,12 +70,12 @@ export function EnvironmentDashboard({ onChangeLocation, now }) {
         </div>
       </div>
 
-      {!online && (
-        <StatusMessage variant="offline" title="Koneksi tidak tersedia">
+      {(!online || snapshot.fromCache) && (
+        <StatusMessage variant="offline" title={online ? "Data tersimpan ditampilkan" : "Koneksi tidak tersedia"}>
           Data tersimpan — bukan kondisi terkini. Informasi edukasi tetap dapat dibaca.
         </StatusMessage>
       )}
-      {online && anyStale && (
+      {online && !snapshot.fromCache && anyStale && (
         <StatusMessage variant="stale" title="Sebagian data bukan kondisi terkini" action={<Button size="sm" onClick={refresh}>Perbarui Data</Button>}>
           Waktu data ditampilkan pada setiap indikator.
         </StatusMessage>

@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#FFF8FB" />
+    <title>Koneksi tidak tersedia · SYCLE V2</title>
+    <style>
+      :root { color-scheme: light; }
+      body { margin: 0; min-height: 100vh; display: grid; place-items: center; background: #fff8fb; color: #332a35;
+        font-family: "Open Sans", system-ui, -apple-system, "Segoe UI", sans-serif; }
+      main { max-width: 32rem; margin: 16px; padding: 24px; background: #fff; border: 1px solid #ecd9e2; border-radius: 16px; }
+      img { width: 56px; height: 56px; border-radius: 12px; }
+      h1 { font-size: 1.4rem; margin: 16px 0 8px; }
+      p { line-height: 1.6; margin: 8px 0; }
+      .box { background: #e8f1f7; border-radius: 12px; padding: 12px 16px; font-size: 0.95rem; }
+      a, button { display: inline-flex; align-items: center; min-height: 44px; margin: 12px 8px 0 0; padding: 0 16px;
+        border-radius: 10px; font: inherit; font-weight: 600; text-decoration: none; cursor: pointer; }
+      button { background: #b84e73; color: #fff; border: 0; }
+      button:active { background: #8e3e5e; }
+      a { color: #8e3e5e; border: 1px solid #ecd9e2; background: #fff; }
+      :focus-visible { outline: 3px solid #8e3e5e; outline-offset: 2px; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <img src="/icons/icon-192.png" alt="Logo SYCLE" />
+      <h1>Koneksi tidak tersedia</h1>
+      <p>Halaman ini belum tersimpan untuk dibuka tanpa internet.</p>
+      <p class="box">
+        Halaman yang pernah kamu buka, seperti Beranda dan Info &amp; Edukasi, tetap dapat dibaca offline. Health Tracker,
+        Riwayat, dan Profil memerlukan koneksi internet agar datamu tetap aman.
+      </p>
+      <button type="button" onclick="location.reload()">Coba Lagi</button>
+      <a href="/info-edukasi">Info &amp; Edukasi</a>
+    </main>
+  </body>
+</html>

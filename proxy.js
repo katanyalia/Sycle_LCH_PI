@@ -10,6 +10,8 @@ import { isGuestOnlyPath, isMemberOnlyPath } from "@/lib/auth/redirect";
 export async function proxy(request) {
   const { response, claims } = await updateSession(request);
   const { pathname, search } = request.nextUrl;
+  // Tahap 8: service worker mengosongkan cache halaman publik bila status login berubah (lihat public/sw.js).
+  response.headers.set("x-sycle-viewer", claims ? "member" : "guest");
 
   if (!claims && isMemberOnlyPath(pathname)) {
     const url = request.nextUrl.clone();
@@ -33,5 +35,5 @@ function withCookies(redirect, response) {
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|icon.jpg|brand/|api/).*)"],
+  matcher: ["/((?!_next/static|_next/image|favicon.ico|icon.jpg|brand/|icons/|api/|sw.js|offline.html|manifest.webmanifest).*)"],
 };

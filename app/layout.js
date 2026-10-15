@@ -6,6 +6,7 @@ import { EnvironmentProvider } from "@/context/EnvironmentContext";
 import { PersonalizationProvider } from "@/context/PersonalizationContext";
 import { TrackerDraftProvider } from "@/context/TrackerDraftContext";
 import { getCurrentUser } from "@/lib/auth/session";
+import { ServiceWorkerRegister } from "@/components/pwa/ServiceWorkerRegister";
 import "./globals.css";
 
 // Font LOCKED: Open Sans (Master Draft 1.6).
@@ -23,6 +24,8 @@ export const metadata = {
   description:
     "SYCLE membantu perempuan memahami kondisi lingkungan, memperoleh edukasi kesehatan berbasis bukti, dan mencatat pengalaman tubuh secara sukarela.",
   applicationName: "SYCLE V2",
+  icons: { apple: "/icons/apple-touch-icon.png" },
+  appleWebApp: { capable: true, title: "SYCLE", statusBarStyle: "default" },
 };
 
 export const viewport = {
@@ -50,6 +53,7 @@ export default async function RootLayout({ children }) {
           </main>
           <SiteFooter />
           <MobileNav />
+          <ServiceWorkerRegister />
           </TrackerDraftProvider>
           </PersonalizationProvider>
         </EnvironmentProvider>

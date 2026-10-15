@@ -2,8 +2,9 @@
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 
-// Lokasi & data lingkungan disimpan di memori saja (tidak di localStorage) pada Tahap 2.
-// Penyimpanan untuk mode offline diatur di Tahap 8.
+// Lokasi & data lingkungan disimpan di memori saja (tidak di localStorage).
+// Tahap 8: saat offline, service worker (public/sw.js) mengembalikan data lingkungan terakhir dari Cache Storage
+// dengan tanda `fromCache` → ditampilkan "Data tersimpan — bukan kondisi terkini" (screen 11).
 const EnvironmentContext = createContext(null);
 
 export function EnvironmentProvider({ children }) {
@@ -40,7 +41,7 @@ export function EnvironmentProvider({ children }) {
       const body = await response.json();
       if (id !== requestId.current) return;
       if (!response.ok) throw new Error(body.error ?? "Data lingkungan belum dapat diambil.");
-      setSnapshot(body);
+      setSnapshot({ ...body, fromCache: response.headers.get("x-sycle-cache") === "stored" });
       // Simpan koordinat desa dari BMKG agar bisa dipakai sebagai cadangan pada pembaruan berikutnya.
       setLocation((current) => ({ ...current, ...body.location, kind: target.kind, code: target.code ?? null }));
       setStatus("ready");
@@ -70,6 +71,20 @@ export function EnvironmentProvider({ children }) {
     },
     [load]
   );
+
+  // Dibuka saat offline tanpa lokasi di memori: minta data tersimpan terakhir ke service worker (screen 11).
+  useEffect(() => {
+    if (navigator.onLine || !navigator.serviceWorker?.controller) return;
+    const channel = new MessageChannel();
+    channel.port1.onmessage = (event) => {
+      const stored = event.data?.snapshot;
+      if (!stored?.location || !stored?.indicators) return;
+      setLocation((current) => current ?? { ...stored.location });
+      setSnapshot((current) => current ?? { ...stored, fromCache: true });
+      setStatus((current) => (current === "idle" ? "ready" : current));
+    };
+    navigator.serviceWorker.controller.postMessage({ type: "latest-environment" }, [channel.port2]);
+  }, []);
 
   const refresh = useCallback(() => {
     if (location) load(location);
