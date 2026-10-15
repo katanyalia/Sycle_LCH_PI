@@ -3,7 +3,7 @@ import Link from "next/link";
 import { ShieldCheck, UserRound } from "lucide-react";
 import { PageShell, SupportPanel } from "@/components/layout/PageShell";
 import { StatusMessage } from "@/components/feedback/StatusMessage";
-import { PlannedFeature } from "@/components/feedback/PlannedFeature";
+import { Button } from "@/components/ui/button";
 import { ProfileForm } from "@/components/auth/ProfileForm";
 import { LogoutButton } from "@/components/auth/LogoutButton";
 import { createClient } from "@/lib/supabase/server";
@@ -77,9 +77,14 @@ export default async function ProfilPage({ searchParams }) {
           <ShieldCheck className="size-5 text-primary-pressed" aria-hidden="true" />
           Privasi dan pengelolaan data
         </h2>
-        <PlannedFeature stage={7} screens="70–71">
-          Penjelasan penyimpanan & AI, penghapusan catatan, serta penghapusan data/akun belum aktif.
-        </PlannedFeature>
+        <div className="space-y-3 rounded-xl border bg-card p-4 md:p-6">
+          <p className="text-sm text-muted-foreground">
+            Penjelasan penyimpanan dan AI, Riwayat catatan, serta penghapusan catatan atau akun.
+          </p>
+          <Button asChild variant="outline" size="sm">
+            <Link href="/profil/privasi">Kelola Data</Link>
+          </Button>
+        </div>
       </section>
 
       <LogoutButton />

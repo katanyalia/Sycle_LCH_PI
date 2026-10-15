@@ -173,7 +173,7 @@ export function TrackerSaved() {
       </div>
       <p className="flex items-center gap-1.5 text-sm text-muted-foreground">
         <CircleCheck className="size-4" aria-hidden="true" />
-        PDF dapat dibuat dari catatan tersimpan (Tahap 7).
+        PDF dapat diunduh dari detail catatan di Riwayat.
       </p>
     </div>
   );

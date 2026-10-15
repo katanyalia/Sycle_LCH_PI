@@ -14,6 +14,17 @@ if (key.startsWith("sb_secret_")) {
   process.exit(1);
 }
 
+// Tahap 7: kunci rahasia khusus server untuk Hapus Akun (nilai tidak pernah ditampilkan).
+const secret = process.env.SUPABASE_SECRET_KEY;
+console.log(
+  `Secret key server (Hapus Akun): ${
+    !secret ? "BELUM DIISI — fitur Hapus Akun akan menolak dengan aman" : secret.startsWith("sb_secret_") ? "terbaca, format sb_secret_…" : "terbaca, format tidak dikenal (periksa kembali)"
+  }`
+);
+if (Object.keys(process.env).some((name) => name.startsWith("NEXT_PUBLIC_") && /SECRET|SERVICE_ROLE/i.test(name))) {
+  console.log("PERINGATAN: ada variabel NEXT_PUBLIC_ yang tampak seperti kunci rahasia — hapus prefix NEXT_PUBLIC_.");
+}
+
 const headers = { apikey: key };
 for (const [label, path] of [["Auth health", "/auth/v1/health"], ["Auth settings", "/auth/v1/settings"]]) {
   try {
