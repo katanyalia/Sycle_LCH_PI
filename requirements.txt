@@ -1,0 +1,11 @@
+pandas
+openpyxl
+python-dotenv
+requests
+pymupdf
+pytesseract
+Pillow
+sentence-transformers
+supabase
+google-genai
+beautifulsoup4
