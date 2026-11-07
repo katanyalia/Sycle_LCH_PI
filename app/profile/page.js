@@ -1,13 +1,12 @@
 import Link from "next/link";
 import {
-  UserRound,
   UserRoundPen,
-  Settings,
   ShieldCheck,
-  ClipboardList,
   UserRoundX,
   ChevronRight,
   KeyRound,
+  Mail,
+  LogOut,
 } from "lucide-react";
 
 import { Suspense } from "react";
@@ -24,91 +23,96 @@ export const metadata = {
   title: "Profil | Sycle",
 };
 
-const profileMenus = [
-  {
-    title: "Pengaturan",
-    description: "Pengaturan akun dan preferensi penggunaan.",
-    icon: Settings,
-    status: "Segera tersedia",
-  },
-  {
-    title: "Ubah Password",
-    description: "Ganti password akunmu dengan password baru yang kuat.",
-    icon: KeyRound,
-    href: "/reset-password",
-  },
-  {
-    title: "Privasi",
-    description: "Pelajari kebijakan privasi dan penggunaan data.",
-    icon: ShieldCheck,
-    href: "/profile/privacy",
-  },
-  {
-    title: "Pengelolaan Data Pengguna",
-    description: "Lihat kembali catatan dan riwayat Health Tracker.",
-    icon: ClipboardList,
-    href: "/healthtracker/history",
-  },
-];
+function getInitials(name = "") {
+  return name
+    .trim()
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((word) => word[0])
+    .join("")
+    .toUpperCase() || "S";
+}
 
-function MenuCard({ item }) {
-  const Icon = item.icon;
+function formatDate(value) {
+  if (!value) return null;
 
+  return new Intl.DateTimeFormat("id-ID", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+    timeZone: "UTC",
+  }).format(new Date(value));
+}
+
+function InfoItem({ icon: Icon, label, value }) {
+  return (
+    <div className="flex min-w-0 items-start gap-3">
+      <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-[#F8E8EF] text-[#B84E73]">
+        <Icon size={17} />
+      </div>
+
+      <div className="min-w-0">
+        <p className="text-xs text-[#8A7D89]">{label}</p>
+        <p className="mt-1 break-words text-sm font-bold text-[#332A35]">
+          {value || "Belum dilengkapi"}
+        </p>
+      </div>
+    </div>
+  );
+}
+
+function MenuItem({
+  icon: Icon,
+  title,
+  description,
+  href,
+  disabled = false,
+}) {
   const content = (
-    <div className="flex items-center gap-4">
-      <div className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-[#F8E8EF] text-[#B84E73]">
-        <Icon size={21} />
+    <div className="flex items-center gap-3">
+      <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-[#F8E8EF] text-[#B84E73]">
+        <Icon size={18} />
       </div>
 
       <div className="min-w-0 flex-1">
-        <h2 className="font-extrabold text-[#332A35]">
-          {item.title}
-        </h2>
-
-        <p className="mt-1 text-sm leading-6 text-[#6F6570]">
-          {item.description}
+        <p className="text-sm font-bold text-[#332A35]">
+          {title}
         </p>
 
-        {item.status && (
-          <p
-            className={`mt-2 text-xs font-bold ${
-              item.complete
-                ? "text-[#52765A]"
-                : "text-[#8A7D89]"
-            }`}
-          >
-            {item.status}
+        {description && (
+          <p className="mt-1 text-xs leading-5 text-[#8A7D89]">
+            {description}
           </p>
         )}
       </div>
 
-      {item.href && (
+      {!disabled && (
         <ChevronRight
-          size={20}
-          className="shrink-0 text-[#8A7D89]"
+          size={18}
+          className="shrink-0 text-[#A99BA5]"
         />
       )}
     </div>
   );
 
   const className =
-    "block rounded-[22px] border border-[#F0E5EB] bg-white p-5 transition-colors";
+    "block rounded-2xl border border-[#F0E5EB] bg-white p-4 transition-colors";
 
-  if (item.href) {
+  if (disabled) {
     return (
-      <Link
-        href={item.href}
-        className={`${className} hover:border-[#DDB3C3] hover:bg-[#FFFBFD]`}
-      >
+      <div className={`${className} opacity-70`}>
         {content}
-      </Link>
+      </div>
     );
   }
 
   return (
-    <div className={`${className} opacity-80`}>
+    <Link
+      href={href}
+      className={`${className} hover:border-[#DDB3C3] hover:bg-[#FFFBFD]`}
+    >
       {content}
-    </div>
+    </Link>
   );
 }
 
@@ -123,21 +127,14 @@ async function ProfileContent() {
 
   const supabase = await createClient();
 
-  const profileResult = await getProfile(
-    supabase,
-    user.id
-  );
-
+  const profileResult = await getProfile(supabase, user.id);
   const profile = profileResult.profile ?? {};
 
   const displayName =
-    profile.display_name || user.displayName;
-
-  const joinedDate = profile.created_at
-    ? new Intl.DateTimeFormat("id-ID", {
-        dateStyle: "long",
-      }).format(new Date(profile.created_at))
-    : null;
+    profile.full_name ||
+    profile.display_name ||
+    user.displayName ||
+    "Pengguna SYCLE";
 
   const completedFields = [
     profile.full_name,
@@ -148,132 +145,136 @@ async function ProfileContent() {
 
   const isProfileComplete = completedFields === 4;
 
-  const accountMenus = [
-    {
-      title: "Lengkapi Profil",
-      description:
-        "Lengkapi informasi pribadi untuk pengalaman SYCLE yang lebih personal.",
-      icon: UserRoundPen,
-      href: "/profile/complete",
-      status: isProfileComplete
-        ? "Profil lengkap"
-        : `${completedFields} dari 4 informasi telah dilengkapi`,
-      complete: isProfileComplete,
-    },
-    ...profileMenus,
-  ];
+  const joinedDate = formatDate(profile.created_at);
+  const birthDate = formatDate(profile.birth_date);
+
+  const settingGroups = [{
+    title: "Pengaturan",
+    items: [
+      {
+        title: "Informasi Pribadi",
+        description: "Kelola nama, tanggal lahir, domisili, dan pekerjaan.",
+        icon: UserRoundPen,
+        href: "/profile/complete",
+      },
+    ],
+  },
+  {
+    title: "Privasi dan Keamanan",
+    items: [
+      {
+        title: "Ubah Password",
+        description: "Perbarui password akunmu.",
+        icon: KeyRound,
+        href: "/reset-password",
+      },
+      {
+        title: "Kebijakan Privasi",
+        description: "Pelajari penggunaan dan perlindungan datamu.",
+        icon: ShieldCheck,
+        href: "/profile/privacy",
+      },
+      {
+        title: "Penghapusan Data atau Akun",
+        description: "Kelola penghapusan catatan atau akun SYCLE.",
+        icon: UserRoundX,
+        href: "/profile/delete-account",
+      },
+    ],
+  },];
 
   return (
-    <main className="mx-auto w-full max-w-4xl px-4 py-10 sm:px-6">
-      {/* Header */}
-      <header className="mb-8">
-        <p className="text-sm font-extrabold uppercase tracking-wider text-[#B84E73]">
+    <main className="mx-auto w-full max-w-4xl px-4 py-8 sm:px-6 sm:py-10">
+
+      {/* Page Heading */}
+      <header className="mb-6">
+        <p className="text-xs font-extrabold uppercase tracking-wider text-[#B84E73]">
           Akun Saya
         </p>
 
-        <h1 className="mt-2 text-3xl font-extrabold text-[#332A35]">
-          Profil
+        <h1 className="mt-1 text-2xl font-extrabold text-[#332A35] sm:text-3xl">
+          Profil Saya
         </h1>
 
-        <p className="mt-3 max-w-2xl leading-7 text-[#6F6570]">
-          Kelola akun, privasi, dan catatan kesehatanmu di Sycle.
+        <p className="mt-2 text-sm text-[#6F6570]">
+          Kelola informasi dan pengaturan akun SYCLE.
         </p>
       </header>
 
-      {/* Informasi Akun */}
-      <section className="mb-8 rounded-[22px] bg-[#F8E8EF] p-6 sm:p-8">
+      {/* Profile Identity */}
+      <section className="relative overflow-hidden rounded-[22px] border border-[#F0DFE7] bg-[#F8E8EF] p-5 sm:p-7">
+
         <div className="flex items-center gap-4">
-          <div className="flex size-14 shrink-0 items-center justify-center rounded-full bg-white text-[#B84E73]">
-            <UserRound size={28} />
+          <div className="flex size-16 shrink-0 items-center justify-center rounded-full border-4 border-white bg-[#B84E73] text-xl font-extrabold text-white shadow-sm">
+            {getInitials(displayName)}
           </div>
 
-          <div className="min-w-0">
-            <h2 className="text-xl font-extrabold text-[#332A35]">
-              Akun Pengguna
+          <div className="min-w-0 flex-1">
+            <h2 className="break-words text-lg font-extrabold text-[#332A35] sm:text-xl">
+              {displayName}
             </h2>
 
-            <p className="mt-1 break-words text-sm text-[#6F6570]">
-              {displayName}
-            </p>
-
-            <p className="mt-1 break-words text-sm text-[#6F6570]">
-              {user.email}
-            </p>
+            <div className="mt-1 flex items-center gap-2 text-sm text-[#6F6570]">
+              <Mail size={14} />
+              <span className="break-all">{user.email}</span>
+            </div>
 
             {joinedDate && (
               <p className="mt-1 text-xs text-[#8A7D89]">
-                Bergabung {joinedDate}
+                Bergabung sejak {joinedDate}
               </p>
             )}
           </div>
         </div>
       </section>
 
-      {/* Pesan jika tabel profil belum tersedia */}
+      {/* Database Warning */}
       {profileResult.missingTable && (
-        <div className="mb-6 rounded-xl border border-[#E8C8D5] bg-[#FFF8FB] p-4">
+        <div className="mt-4 rounded-xl border border-[#E8C8D5] bg-[#FFF8FB] p-4">
           <p className="text-sm text-[#8E3E5E]">
-            Data profil belum tersedia. Silakan periksa konfigurasi
-            database Supabase.
+            Data profil belum tersedia. Silakan periksa konfigurasi database Supabase.
           </p>
         </div>
       )}
 
-      {/* Menu Pengaturan */}
-      <section>
-        <h2 className="mb-4 text-lg font-extrabold text-[#332A35]">
-          Pengaturan dan Pengelolaan Akun
-        </h2>
+      {/* Account Settings */}
+      {settingGroups.map((group) => (
+        <section key={group.title} className="mt-7">
+          <h2 className="mb-3 font-extrabold text-[#332A35]">
+            {group.title}
+          </h2>
 
-        <div className="grid gap-3">
-          {accountMenus.map((item) => (
-            <MenuCard
-              key={item.title}
-              item={item}
-            />
-          ))}
-
-          {/* Penghapusan Data */}
-          <div className="rounded-[22px] border border-[#F0E5EB] bg-white p-5">
-            <div className="flex items-center gap-4">
-              <div className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-[#F8E8EF] text-[#B84E73]">
-                <UserRoundX size={21} />
-              </div>
-
-              <div className="min-w-0 flex-1">
-                <h2 className="font-extrabold text-[#332A35]">
-                  Penghapusan Data atau Akun
-                </h2>
-
-                <p className="mt-1 text-sm leading-6 text-[#6F6570]">
-                  Kelola permintaan penghapusan data pribadi atau akunmu.
-                </p>
-
-                <p className="mt-2 text-xs font-bold text-[#8A7D89]">
-                  Pengaturan penghapusan akan disiapkan berikutnya.
-                </p>
-              </div>
-            </div>
+          <div className="grid gap-2 sm:grid-cols-2">
+            {group.items.map((item) => (
+              <MenuItem
+                key={item.title}
+                {...item}
+              />
+            ))}
           </div>
-        </div>
-      </section>
+        </section>
+      ))}
 
       {/* Logout */}
-      <section className="mt-8 rounded-[22px] border border-[#F0E5EB] bg-white p-6">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <h2 className="font-extrabold text-[#332A35]">
-              Keluar dari Akun
-            </h2>
-
-            <p className="mt-1 text-sm leading-6 text-[#6F6570]">
-              Akhiri sesi masukmu di perangkat ini.
-            </p>
+      <section className="mt-6 flex flex-col gap-3 rounded-[22px] border border-[#F0E5EB] bg-white p-5 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-center gap-3">
+          <div className="flex size-9 items-center justify-center rounded-xl bg-[#F8E8EF] text-[#B84E73]">
+            <LogOut size={18} />
           </div>
 
-          <LogoutButton />
+          <div>
+            <p className="text-sm font-bold text-[#332A35]">
+              Keluar dari Akun
+            </p>
+            <p className="mt-1 text-xs text-[#8A7D89]">
+              Akhiri sesi akunmu di perangkat ini.
+            </p>
+          </div>
         </div>
+
+        <LogoutButton />
       </section>
+
     </main>
   );
 }

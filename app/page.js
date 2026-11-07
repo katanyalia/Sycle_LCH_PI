@@ -87,11 +87,12 @@ export default function HomePage() {
   );
 
   function startCheckin() {
-    if (!hasSelectedLocation || !hasChosenActivity) {
+    if (!hasChosenActivity || !activity) {
       return;
     }
 
     resetAssessment("guest");
+    setActivity(activity);
     router.push(`/assessment?activity=${activity}`);
   }
 

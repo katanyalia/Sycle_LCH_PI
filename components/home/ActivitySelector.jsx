@@ -49,10 +49,8 @@ export default function ActivitySelector({
   activity,
   setActivity,
   onStartCheckin,
-  hasSelectedLocation = false,
-  hasChosenActivity = false,
 }) {
-  const canContinue = hasSelectedLocation && hasChosenActivity;
+  const canContinue = Boolean(activity);
 
   return (
     <section className="panel activity-panel">
@@ -70,12 +68,6 @@ export default function ActivitySelector({
         </div>
       </div>
 
-      {!hasSelectedLocation && (
-        <p className="location-status" role="status">
-          Pilih lokasi terlebih dahulu untuk menentukan aktivitasmu.
-        </p>
-      )}
-
       <div className="activity-options">
         {activities.map((item) => {
           const Icon = item.icon;
@@ -92,13 +84,7 @@ export default function ActivitySelector({
                 .filter(Boolean)
                 .join(" ")}
               onClick={() => setActivity(item.id)}
-              disabled={!hasSelectedLocation}
               aria-pressed={isSelected}
-              title={
-                !hasSelectedLocation
-                  ? "Pilih lokasi terlebih dahulu"
-                  : `Pilih aktivitas ${item.title}`
-              }
             >
               <div className="activity-option-top">
                 <div
