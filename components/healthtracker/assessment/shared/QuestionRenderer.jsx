@@ -14,6 +14,9 @@ import {
   Thermometer,
   Footprints,
   Sparkles,
+  House,
+  Car,
+  CheckCircle2,
 } from "lucide-react";
 
 import {
@@ -46,6 +49,48 @@ function getOptionIcon(label = "") {
   else if (/cemas|sedih|stres/.test(text)) Icon = Frown;
 
   return <Icon size={24} strokeWidth={1.8} color="#B84E73" />;
+}
+
+function getActivityVisual(label = "") {
+  const text = String(label).toLowerCase();
+
+  if (/dalam ruangan|indoor/.test(text)) {
+    return {
+      Icon: House,
+      description: "Beraktivitas di dalam ruangan",
+      animation: "activity-float",
+    };
+  }
+
+  if (/luar ruangan|outdoor/.test(text)) {
+    return {
+      Icon: Sun,
+      description: "Beraktivitas di luar ruangan",
+      animation: "activity-sun",
+    };
+  }
+
+  if (/berpindah|moving/.test(text)) {
+    return {
+      Icon: Footprints,
+      description: "Beraktivitas di beberapa lokasi",
+      animation: "activity-walk",
+    };
+  }
+
+  if (/perjalanan|travel/.test(text)) {
+    return {
+      Icon: Car,
+      description: "Beraktivitas selama perjalanan",
+      animation: "activity-drive",
+    };
+  }
+
+  return {
+    Icon: Sparkles,
+    description: "Pilih aktivitas yang sesuai",
+    animation: "activity-float",
+  };
 }
 
 // Pilihan skala 0–4
@@ -93,6 +138,147 @@ export default function QuestionRenderer({
 
   // SINGLE
   if (question.type === "single") {
+    // Tampilan khusus untuk pilihan aktivitas HT-04
+    if (question.code === "HT-04") {
+      return (
+        <>
+          <div className="grid grid-cols-2 gap-3 sm:gap-4">
+            {question.options?.map((option) => {
+              const optionValue = getValue(option);
+              const label = getLabel(option);
+              const selected = value === optionValue;
+
+              const visual = getActivityVisual(label);
+              const Icon = visual.Icon;
+
+              return (
+                <button
+                  key={optionValue}
+                  type="button"
+                  onClick={() =>
+                    updateAnswer(question.code, optionValue)
+                  }
+                  aria-pressed={selected}
+                  className={`group relative flex min-h-[170px] flex-col items-center justify-center overflow-hidden rounded-2xl border p-4 text-center transition-all duration-300 hover:-translate-y-1 hover:shadow-lg active:scale-[0.97] ${
+                    selected
+                      ? "border-[#B84E73] bg-[#F8E8EF] shadow-md ring-2 ring-[#B84E73]/20"
+                      : "border-[#EADDE3] bg-white hover:border-[#D99AAF] hover:bg-[#FFF8FB]"
+                  }`}
+                >
+                  {/* Ikon animasi */}
+                  <span
+                    className={`mb-4 flex h-16 w-16 items-center justify-center rounded-2xl transition-colors duration-300 ${
+                      selected
+                        ? "bg-white text-[#B84E73]"
+                        : "bg-[#FFF8FB] text-[#B84E73]"
+                    }`}
+                  >
+                    <Icon
+                      size={34}
+                      strokeWidth={1.7}
+                      className={visual.animation}
+                    />
+                  </span>
+
+                  {/* Judul pilihan */}
+                  <span
+                    className={`text-sm font-extrabold sm:text-base ${
+                      selected
+                        ? "text-[#8E3E5E]"
+                        : "text-[#5F5360]"
+                    }`}
+                  >
+                    {label}
+                  </span>
+
+                  {/* Deskripsi */}
+                  <span className="mt-2 text-xs leading-5 text-[#8A7B87]">
+                    {visual.description}
+                  </span>
+
+                  {/* Indikator pilihan */}
+                  <span className="absolute right-3 top-3">
+                    {selected ? (
+                      <CheckCircle2
+                        size={21}
+                        className="text-[#B84E73]"
+                      />
+                    ) : (
+                      <span className="block h-5 w-5 rounded-full border border-[#EADDE3]" />
+                    )}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+
+          <style jsx>{`
+            .activity-float {
+              animation: float 3s ease-in-out infinite;
+            }
+
+            .activity-sun {
+              animation: rotate 12s linear infinite;
+            }
+
+            .activity-walk {
+              animation: walk 1.2s ease-in-out infinite;
+            }
+
+            .activity-drive {
+              animation: drive 2s ease-in-out infinite;
+            }
+
+            @keyframes float {
+              0%, 100% {
+                transform: translateY(0);
+              }
+              50% {
+                transform: translateY(-7px);
+              }
+            }
+
+            @keyframes rotate {
+              from {
+                transform: rotate(0deg);
+              }
+              to {
+                transform: rotate(360deg);
+              }
+            }
+
+            @keyframes walk {
+              0%, 100% {
+                transform: translateY(0) rotate(-8deg);
+              }
+              50% {
+                transform: translateY(-6px) rotate(8deg);
+              }
+            }
+
+            @keyframes drive {
+              0%, 100% {
+                transform: translateX(-3px);
+              }
+              50% {
+                transform: translateX(3px);
+              }
+            }
+
+            @media (prefers-reduced-motion: reduce) {
+              .activity-float,
+              .activity-sun,
+              .activity-walk,
+              .activity-drive {
+                animation: none;
+              }
+            }
+          `}</style>
+        </>
+      );
+    }
+
+    // SINGLE untuk pertanyaan lainnya tetap menggunakan tampilan lama
     return (
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         {question.options?.map((option) => {
@@ -104,7 +290,9 @@ export default function QuestionRenderer({
             <button
               key={optionValue}
               type="button"
-              onClick={() => updateAnswer(question.code, optionValue)}
+              onClick={() =>
+                updateAnswer(question.code, optionValue)
+              }
               aria-pressed={selected}
               className={`group flex min-h-[88px] items-center gap-4 rounded-2xl border p-4 text-left transition-all duration-200 hover:-translate-y-1 hover:shadow-md active:scale-[0.98] ${
                 selected

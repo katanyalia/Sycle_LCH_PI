@@ -45,6 +45,12 @@ function SignupForm() {
   const [success, setSuccess] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
+  const isHealthTrackerNext = nextPath === "/healthtracker";
+
+  const healthTrackerWelcomePath = isHealthTrackerNext
+    ? "/healthtracker?welcome=1"
+    : nextPath;
+
   async function handleSubmit(event) {
     event.preventDefault();
     setError("");
@@ -91,7 +97,7 @@ function SignupForm() {
       }
 
       if (data.session) {
-        router.push(nextPath);
+        router.push(healthTrackerWelcomePath);
         router.refresh();
         return;
       }
@@ -255,7 +261,11 @@ function SignupForm() {
             >
               {success}{" "}
               <Link
-                href={`/login?next=${encodeURIComponent(nextPath)}`}
+                href={
+                  isHealthTrackerNext
+                    ? `/login?next=${encodeURIComponent(nextPath)}&welcome=1`
+                    : `/login?next=${encodeURIComponent(nextPath)}`
+                }
                 className="font-extrabold underline"
               >
                 Lanjut ke login

@@ -1,17 +1,152 @@
 import Link from "next/link";
+
 import { Suspense } from "react";
 import { redirect } from "next/navigation";
 import { connection } from "next/server";
+import {
+  ArrowLeft,
+  ArrowRight,
+  CalendarDays,
+  ClipboardList,
+  Activity,
+  Heart,
+  Clock3,
+  MessageCircle,
+  Footprints,
+  Sprout,
+} from "lucide-react";
+
 import { getCurrentUser } from "@/lib/auth/session";
 import { getMyTrackerEntries } from "@/lib/tracker/records";
+import StartNewCheckInButton from "@/components/healthtracker/StartNewCheckInButton";
 
-export const metadata = { title: "Ringkasan Health Tracker" };
+export const metadata = {
+  title: "Ringkasan Hari Ini | Health Tracker",
+};
+
+function getJakartaDateKey() {
+  const parts = new Intl.DateTimeFormat("en-GB", {
+    timeZone: "Asia/Jakarta",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(new Date());
+
+  const values = Object.fromEntries(
+    parts.map((part) => [part.type, part.value])
+  );
+
+  return `${values.year}-${values.month}-${values.day}`;
+}
+
+function getTodayLabel() {
+  return new Intl.DateTimeFormat("id-ID", {
+    timeZone: "Asia/Jakarta",
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  }).format(new Date());
+}
+
+function SummaryCard({ entry, index }) {
+  return (
+    <article className="rounded-[22px] border border-[#F0E2E9] bg-white p-5 sm:p-6">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <span className="inline-flex items-center gap-2 rounded-full bg-[#F8E8EF] px-3 py-1.5 text-xs font-bold text-[#8E3E5E]">
+          <Heart size={14} />
+          {entry.condition || "Catatan umum"}
+        </span>
+
+        <span className="inline-flex items-center gap-1.5 text-xs text-[#817681]">
+          <Clock3 size={14} />
+          {entry.time || "Waktu tidak tersedia"}
+        </span>
+      </div>
+
+      <h3 className="mt-5 text-lg font-extrabold text-[#332A35]">
+        Check-In {index + 1}
+      </h3>
+
+      <div className="mt-5 grid gap-4 sm:grid-cols-2">
+        <div className="flex items-start gap-3">
+          <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-[#E8F1F7] text-[#64869E]">
+            <Footprints size={19} />
+          </div>
+
+          <div>
+            <p className="text-xs text-[#958995]">Aktivitas</p>
+            <p className="mt-1 text-sm font-semibold text-[#463C48]">
+              {entry.activity || "Belum dicatat"}
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-start gap-3">
+          <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-[#E9F2EA] text-[#64866A]">
+            <Activity size={19} />
+          </div>
+
+          <div>
+            <p className="text-xs text-[#958995]">
+              Kenyamanan tubuh
+            </p>
+            <p className="mt-1 text-sm font-semibold text-[#463C48]">
+              {entry.comfort || "Belum dicatat"}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {entry.story && (
+        <div className="mt-5 rounded-2xl bg-[#FFF8FB] p-4">
+          <div className="flex items-center gap-2 text-sm font-bold text-[#463C48]">
+            <MessageCircle size={16} className="text-[#B84E73]" />
+            Cerita hari ini
+          </div>
+
+          <p className="mt-2 whitespace-pre-wrap text-sm leading-7 text-[#766D78]">
+            {entry.story}
+          </p>
+        </div>
+      )}
+    </article>
+  );
+}
+
+function SummaryStat({ icon: Icon, label, value, description }) {
+  return (
+    <div className="rounded-[20px] border border-[#F0E2E9] bg-white p-5">
+      <div className="flex items-center gap-3">
+        <div className="flex size-10 items-center justify-center rounded-xl bg-[#F8E8EF] text-[#B84E73]">
+          <Icon size={19} />
+        </div>
+
+        <p className="text-sm font-semibold text-[#766D78]">
+          {label}
+        </p>
+      </div>
+
+      <p className="mt-4 text-2xl font-extrabold text-[#332A35]">
+        {value}
+      </p>
+
+      <p className="mt-1 text-xs leading-5 text-[#958995]">
+        {description}
+      </p>
+    </div>
+  );
+}
 
 export default function HealthTrackerSummaryPage() {
   return (
     <Suspense
       fallback={
-        <main className="mx-auto w-full max-w-6xl px-6 py-10">Memuat ringkasan...</main>
+        <main className="mx-auto max-w-6xl px-5 py-10">
+          <p className="text-sm text-[#817681]">
+            Memuat ringkasan hari ini...
+          </p>
+        </main>
       }
     >
       <Content />
@@ -21,208 +156,174 @@ export default function HealthTrackerSummaryPage() {
 
 async function Content() {
   await connection();
+
   const user = await getCurrentUser();
-  if (!user) redirect("/login?next=/healthtracker/summary");
 
-  const { entries } = await getMyTrackerEntries();
+  if (!user) {
+    redirect("/login?next=/healthtracker/summary");
+  }
 
-  const latestEntry = entries[0] ?? null;
+  const { entries = [] } = await getMyTrackerEntries();
 
-  const conditionCounts = entries.reduce((counts, entry) => {
-    if (entry.condition) {
-      counts[entry.condition] = (counts[entry.condition] || 0) + 1;
-    }
+  const todayKey = getJakartaDateKey();
+  const todayLabel = getTodayLabel();
 
-    return counts;
-  }, {});
+  // Hanya mengambil catatan dengan tanggal hari ini.
+  const todayEntries = entries.filter(
+    (entry) => entry.dateKey === todayKey
+  );
 
-  const mostRecordedCondition = Object.entries(conditionCounts).sort(
-    (a, b) => b[1] - a[1]
-  )[0];
+  const latestEntry = todayEntries[0] ?? null;
+
+  const totalToday = todayEntries.length;
+
+  const recordedConditions = new Set(
+    todayEntries
+      .map((entry) => entry.condition)
+      .filter(Boolean)
+  ).size;
 
   return (
-    <section className="mx-auto w-full max-w-6xl px-6 py-10">
+    <main className="mx-auto w-full max-w-6xl px-5 py-8 sm:px-6 sm:py-10">
+
+      {/* BACK TO DASHBOARD */}
       <Link
         href="/healthtracker"
-        className="text-sm font-extrabold text-[#B84E73] hover:underline"
+        className="inline-flex items-center gap-2 text-sm font-bold text-[#8A6578] transition hover:text-[#B84E73]"
       >
-        ← Kembali ke Health Tracker
+        <ArrowLeft size={17} />
+        Kembali ke Health Tracker
       </Link>
 
-      <div className="mb-8 mt-5">
-        <p className="text-sm font-extrabold uppercase tracking-wider text-[#B84E73]">
-          Gambaran Perjalananmu
-        </p>
+      {/* PAGE HEADER */}
+      <header className="mt-7">
+        <div className="inline-flex items-center gap-2 rounded-full bg-[#F8E8EF] px-3 py-1.5 text-xs font-bold text-[#8E3E5E]">
+          <Sprout size={15} />
+          RINGKASAN HARIAN
+        </div>
 
-        <h1 className="mt-2 text-3xl font-extrabold text-[#332A35]">
-          Ringkasan Kesehatan
+        <h1 className="mt-4 text-2xl font-extrabold tracking-tight text-[#332A35] sm:text-3xl lg:text-4xl">
+          Bagaimana harimu?
         </h1>
 
-        <p className="mt-2 max-w-2xl leading-7 text-[#6F6570]">
-          Lihat rangkuman catatan check-in yang telah kamu simpan.
-          Gunakan catatan ini untuk mengenali pengalamanmu dari
-          waktu ke waktu, bukan untuk mendiagnosis kondisi medis.
-        </p>
-      </div>
-
-      {/* Statistik utama */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        <div className="rounded-[22px] border border-[#F0E2E9] bg-white p-6 shadow-sm">
-          <p className="text-sm font-bold text-[#8A7D89]">
-            TOTAL CHECK-IN
-          </p>
-
-          <p className="mt-3 text-4xl font-extrabold text-[#B84E73]">
-            {entries.length}
-          </p>
-
-          <p className="mt-2 text-sm text-[#6F6570]">
-            Catatan yang tersimpan
-          </p>
-        </div>
-
-        <div className="rounded-[22px] border border-[#D7E6D9] bg-[#E9F2EA] p-6">
-          <p className="text-sm font-bold text-[#426B4A]">
-            KONDISI TERAKHIR
-          </p>
-
-          <p className="mt-3 text-2xl font-extrabold text-[#332A35]">
-            {latestEntry?.condition || "Belum ada data"}
-          </p>
-
-          <p className="mt-2 text-sm text-[#5F7162]">
-            {latestEntry?.date || "Selesaikan check-in pertamamu"}
-          </p>
-        </div>
-
-        <div className="rounded-[22px] border border-[#E1DCF0] bg-[#EEEAF8] p-6 sm:col-span-2 lg:col-span-1">
-          <p className="text-sm font-bold text-[#66558F]">
-            KONDISI YANG SERING DICATAT
-          </p>
-
-          <p className="mt-3 text-2xl font-extrabold text-[#332A35]">
-            {mostRecordedCondition?.[0] || "Belum ada data"}
-          </p>
-
-          <p className="mt-2 text-sm text-[#71658A]">
-            {mostRecordedCondition
-              ? `${mostRecordedCondition[1]} kali dicatat`
-              : "Data akan muncul setelah kamu menyimpan check-in."}
-          </p>
-        </div>
-      </div>
-
-      {/* Distribusi kondisi */}
-      <div className="mt-6 rounded-[22px] border border-[#F0E2E9] bg-white p-6 shadow-sm sm:p-8">
-        <h2 className="text-xl font-extrabold text-[#332A35]">
-          Catatan berdasarkan kondisi
-        </h2>
-
-        <p className="mt-2 text-sm leading-6 text-[#6F6570]">
-          Jumlah catatan untuk setiap kondisi yang kamu pilih.
+        <p className="mt-2 inline-flex items-center gap-2 text-sm font-semibold text-[#8E3E5E]">
+          <CalendarDays size={16} />
+          {todayLabel}
         </p>
 
-        {Object.keys(conditionCounts).length === 0 ? (
-          <div className="mt-6 rounded-xl bg-[#FFF8FB] p-5">
-            <p className="text-sm leading-6 text-[#6F6570]">
-              Belum ada data untuk diringkas. Setelah kamu menyimpan
-              hasil assessment, distribusi catatan akan ditampilkan di sini.
-            </p>
+        <p className="mt-3 max-w-2xl text-sm leading-7 text-[#766D78] sm:text-base">
+          Lihat kembali pengalaman yang sudah kamu catat hari ini.
+          Ringkasan ini membantumu mengingat aktivitas, kondisi,
+          dan cerita yang kamu bagikan.
+        </p>
+      </header>
 
-            <Link
-              href="/assessment"
-              className="mt-4 inline-flex font-extrabold text-[#B84E73] hover:underline"
-            >
-              Mulai Daily Check-In →
-            </Link>
-          </div>
-        ) : (
-          <div className="mt-6 space-y-5">
-            {Object.entries(conditionCounts).map(([condition, count]) => {
-              const percentage = Math.round(
-                (count / entries.length) * 100
-              );
-
-              return (
-                <div key={condition}>
-                  <div className="mb-2 flex items-center justify-between gap-3">
-                    <span className="font-bold text-[#332A35]">
-                      {condition}
-                    </span>
-
-                    <span className="text-sm text-[#6F6570]">
-                      {count} catatan ({percentage}%)
-                    </span>
-                  </div>
-
-                  <div
-                    className="h-3 overflow-hidden rounded-full bg-[#F8E8EF]"
-                    role="progressbar"
-                    aria-label={`Proporsi catatan ${condition}`}
-                    aria-valuemin={0}
-                    aria-valuemax={100}
-                    aria-valuenow={percentage}
-                  >
-                    <div
-                      className="h-full rounded-full bg-[#B84E73] transition-all"
-                      style={{ width: `${percentage}%` }}
-                    />
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
-      </div>
-
-      {/* Aktivitas terbaru */}
-      {latestEntry && (
-        <div className="mt-6 rounded-[22px] border border-[#F0E2E9] bg-white p-6 shadow-sm">
-          <h2 className="text-xl font-extrabold text-[#332A35]">
-            Aktivitas pada check-in terakhir
+      {/* TODAY OVERVIEW */}
+      <section className="mt-8">
+        <div className="mb-4">
+          <h2 className="text-lg font-extrabold text-[#332A35]">
+            Ikhtisar Hari Ini
           </h2>
 
-          <p className="mt-4 text-sm text-[#8A7D89]">
-            {latestEntry.date}
+          <p className="mt-1 text-sm text-[#817681]">
+            Gambaran dari Check-In yang kamu lakukan hari ini.
           </p>
-
-          <p className="mt-1 text-lg font-extrabold text-[#332A35]">
-            {latestEntry.activity || "Aktivitas belum dicatat"}
-          </p>
-
-          <p className="mt-2 text-sm text-[#6F6570]">
-            Kenyamanan tubuh: {latestEntry.comfort || "Belum dicatat"}
-          </p>
-
-          {latestEntry.story && (
-            <div className="mt-4 rounded-xl bg-[#FFF8FB] p-4">
-              <p className="text-xs font-extrabold text-[#8A7D89]">
-                CERITAMU
-              </p>
-
-              <p className="mt-2 text-sm leading-6 text-[#6F6570]">
-                {latestEntry.story}
-              </p>
-            </div>
-          )}
         </div>
-      )}
 
-      <div className="mt-6 flex flex-wrap gap-3">
-        <Link
-          href="/healthtracker/history"
-          className="inline-flex rounded-full border border-[#E5CCD7] px-5 py-3 font-extrabold text-[#B84E73] transition hover:bg-[#FFF8FB]"
-        >
-          Lihat Riwayat
-        </Link>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <SummaryStat
+            icon={ClipboardList}
+            label="Check-In Hari Ini"
+            value={totalToday}
+            description="Jumlah catatan yang tersimpan hari ini."
+          />
 
-        <Link
-          href="/assessment"
-          className="inline-flex rounded-full bg-[#B84E73] px-5 py-3 font-extrabold text-white transition hover:bg-[#8E3E5E]"
-        >
-          Daily Check-In →
-        </Link>
-      </div>
-    </section>
+          <SummaryStat
+            icon={Heart}
+            label="Konteks Kondisi"
+            value={recordedConditions}
+            description="Jumlah konteks kondisi berbeda yang dicatat."
+          />
+        </div>
+      </section>
+
+      {/* TODAY'S ENTRIES */}
+      <section className="mt-9">
+        <div className="mb-5">
+          <h2 className="text-lg font-extrabold text-[#332A35]">
+            Catatan Hari Ini
+          </h2>
+
+          <p className="mt-1 text-sm text-[#817681]">
+            {totalToday > 0
+              ? `${totalToday} catatan Check-In ditemukan untuk hari ini.`
+              : "Belum ada catatan Check-In untuk hari ini."}
+          </p>
+        </div>
+
+        {todayEntries.length > 0 ? (
+          <div className="space-y-4">
+            {todayEntries.map((entry, index) => (
+              <SummaryCard
+                key={entry.id}
+                entry={entry}
+                index={index}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="rounded-[24px] border border-dashed border-[#E8CBD7] bg-white px-5 py-10 text-center sm:px-8">
+            <div className="mx-auto flex size-16 items-center justify-center rounded-2xl bg-[#F8E8EF] text-[#B84E73]">
+              <CalendarDays size={28} strokeWidth={1.6} />
+            </div>
+
+            <h3 className="mt-5 text-lg font-extrabold text-[#332A35]">
+              Belum Ada Check-In Hari Ini
+            </h3>
+
+            <p className="mx-auto mt-2 max-w-md text-sm leading-7 text-[#817681]">
+              Belum ada pengalaman yang kamu catat hari ini.
+              Kamu bisa mulai dengan check-in untuk mendokumentasikan
+              kondisi tubuh dan aktivitasmu.
+            </p>
+          </div>
+        )}
+      </section>
+
+      {/* NAVIGATION */}
+      <section className="mt-9 rounded-[24px] border border-[#F0DFE7] bg-[#F8E8EF] p-5 sm:p-7">
+        <h2 className="text-lg font-extrabold text-[#332A35]">
+          Lanjutkan Perjalananmu
+        </h2>
+
+        <p className="mt-2 max-w-xl text-sm leading-6 text-[#766D78]">
+          Kamu bisa melihat catatan dari hari-hari sebelumnya
+          atau membuat Check-In baru untuk mencatat pengalamanmu.
+        </p>
+
+        <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+          <Link
+            href="/healthtracker/history"
+            className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full border border-[#DDBBC9] bg-white px-5 py-3 text-sm font-bold text-[#8E3E5E] transition hover:bg-[#FFF8FB]"
+          >
+            <CalendarDays size={17} />
+            Lihat Riwayat
+            <ArrowRight size={16} />
+          </Link>
+
+          <StartNewCheckInButton />
+        </div>
+      </section>
+
+      {/* DISCLAIMER */}
+      <footer className="mt-8 border-t border-[#F0E2E9] pt-5">
+        <p className="text-xs leading-6 text-[#958995]">
+          Ringkasan ini menampilkan catatan yang kamu simpan pada
+          tanggal hari ini. Informasi yang ditampilkan merupakan
+          dokumentasi pengalaman pribadi, bukan diagnosis atau
+          pengganti konsultasi tenaga kesehatan.
+        </p>
+      </footer>
+    </main>
   );
 }

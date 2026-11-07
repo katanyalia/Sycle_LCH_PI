@@ -24,9 +24,6 @@ export default function useHealthTrackerEnvironment(environmentLocation) {
         coordinates?.longitude != null;
 
       if (!adm4 && !hasCoordinates) {
-        setEnvironmentError(
-          "Lokasi belum terhubung. Silakan pilih lokasi di Beranda terlebih dahulu."
-        );
         setEnvironmentLoading(false);
         return;
       }

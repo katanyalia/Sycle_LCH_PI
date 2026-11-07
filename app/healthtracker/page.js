@@ -11,7 +11,7 @@ export const metadata = {
   title: "Health Tracker",
 };
 
-export default function HealthTrackerPage() {
+export default function HealthTrackerPage({ searchParams }) {
   return (
     <Suspense
       fallback={
@@ -20,15 +20,17 @@ export default function HealthTrackerPage() {
         </main>
       }
     >
-      <HealthTrackerContent />
+      <HealthTrackerContent searchParams={searchParams} />
     </Suspense>
   );
 }
 
-async function HealthTrackerContent() {
+async function HealthTrackerContent({ searchParams }) {
   await connection();
 
   const user = await getCurrentUser();
+  const params = await searchParams;
+  const isNewUser = params?.welcome === "1";
 
   if (!user) {
     return (
@@ -96,5 +98,12 @@ async function HealthTrackerContent() {
 
   const { entries, error } = await getMyTrackerEntries();
 
-  return <TrackerDashboard entries={entries} loadError={error} />;
+  return (
+    <TrackerDashboard
+      entries={entries}
+      loadError={error}
+      displayName={user.displayName || "Teman SYCLE"}
+      isNewUser={isNewUser}
+    />
+  );
 }

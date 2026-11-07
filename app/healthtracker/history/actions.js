@@ -3,6 +3,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentUser } from "@/lib/auth/session";
 import { deleteTrackerRecord } from "@/lib/repositories/trackerRepository";
+import { getMyTrackerEntryDetail } from "@/lib/tracker/records";
 
 export async function deleteTrackerHistory(recordId) {
   if (!recordId || typeof recordId !== "string") {
@@ -40,4 +41,10 @@ export async function deleteTrackerHistory(recordId) {
   }
 
   return { ok: true };
+}
+
+export async function getTrackerHistoryDetail(recordId) {
+  const result = await getMyTrackerEntryDetail(recordId);
+
+  return result;
 }

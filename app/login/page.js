@@ -34,6 +34,10 @@ function LoginForm() {
   const searchParams = useSearchParams();
 
   const nextPath = getSafeNextPath(searchParams.get("next"));
+  const shouldShowWelcome =
+    searchParams.get("welcome") === "1" &&
+    nextPath === "/healthtracker";
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
@@ -59,7 +63,11 @@ function LoginForm() {
         return;
       }
 
-      router.push(nextPath);
+      const destination = shouldShowWelcome
+        ? "/healthtracker?welcome=1"
+        : nextPath;
+
+      router.push(destination);
       router.refresh();
     } catch {
       setErrorMessage(

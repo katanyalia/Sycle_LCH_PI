@@ -1,5 +1,7 @@
 "use client";
 
+import { useState } from "react";
+
 export default function useHealthTrackerNavigation({
   router,
   currentStep,
@@ -13,6 +15,8 @@ export default function useHealthTrackerNavigation({
   setError,
   setAiNotice,
 }) {
+  const [isAILoading, setIsAILoading] = useState(false);
+
   function handleNext() {
     if (!validateCurrentStep()) return;
 
@@ -60,9 +64,14 @@ export default function useHealthTrackerNavigation({
   }
 
   function handleContinueWithAI() {
-    setAiNotice(
-      "AI Health Tracker berbasis Hybrid RAG sedang dalam tahap pengembangan. Untuk saat ini, kamu dapat melanjutkan tanpa AI."
-    );
+    setError("");
+    setAiNotice("");
+    setIsAILoading(true);
+  }
+
+  function handleAIComplete() {
+    setIsAILoading(false);
+    setCurrentStep(summaryStep);
   }
 
   return {
@@ -71,5 +80,7 @@ export default function useHealthTrackerNavigation({
     handleSkipQuestions,
     handleContinueWithoutAI,
     handleContinueWithAI,
+    handleAIComplete,
+    isAILoading,
   };
 }

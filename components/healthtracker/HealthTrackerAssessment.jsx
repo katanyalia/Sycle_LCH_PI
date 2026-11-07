@@ -11,12 +11,14 @@ import GeneralQuestionsScreen from "./assessment/GeneralQuestionsScreen";
 import ReviewScreen from "./assessment/ReviewScreen";
 import StoryScreen from "./assessment/StoryScreen";
 import SummaryScreen from "./assessment/SummaryScreen";
+import LoadingAIScreen from "./assessment/LoadingAIScreen";
 
 import useHealthTrackerEnvironment from "./assessment/hooks/useHealthTrackerEnvironment";
 import useHealthTrackerAssessment from "./assessment/hooks/useHealthTrackerAssessment";
 import useHealthTrackerSubmission from "./assessment/hooks/useHealthTrackerSubmission";
 import useHealthTrackerNavigation from "./assessment/hooks/useHealthTrackerNavigation";
 import SummaryQuestionCard from "./assessment/shared/SummaryQuestionCard";
+import HealthTrackerLocationPicker from "./HealthTrackerLocationPicker";
 
 import {
   buildSummaryQuestions,
@@ -155,6 +157,8 @@ export default function HealthTrackerAssessment() {
     handleSkipQuestions,
     handleContinueWithoutAI,
     handleContinueWithAI,
+    handleAIComplete,
+    isAILoading,
   } = useHealthTrackerNavigation({
     router,
     currentStep,
@@ -186,65 +190,61 @@ export default function HealthTrackerAssessment() {
     [condition, activityQuestion]
   );
 
+  const conditionLabel =
+    CONDITION_OPTIONS.find((option) => option.value === condition)?.label ??
+    "Tidak disebutkan";
+
   return (
     <main className="health-tracker-flow mx-auto w-full max-w-4xl">
 
-      {/* Hero */}
-      <section className="mb-7 overflow-hidden rounded-3xl border border-[#F0E3E9] bg-[#FFF8FB] p-6 sm:p-8">
+      {/* Hero dan informasi lokasi hanya tampil sebelum SummaryScreen */}
+      {currentStep !== summaryStep && (
+        <section className="mb-7 overflow-hidden rounded-3xl border border-[#F0E3E9] bg-[#FFF8FB] p-6 sm:p-8">
 
-        <div className="mb-5 flex items-center gap-2">
-          <span className="rounded-full bg-[#F8E8EF] px-3 py-1 text-xs font-bold tracking-wide text-[#B84E73]">
-            HEALTH TRACKER
-          </span>
-          <span className="text-xs text-[#8A7B87]">
-            Catatan kesehatan personal
-          </span>
-        </div>
-
-        <h1 className="max-w-2xl text-2xl font-bold leading-snug text-[#332A35] sm:text-3xl">
-          Bagaimana keadaan tubuhmu hari ini?
-        </h1>
-
-        <p className="mt-3 max-w-2xl text-sm leading-7 text-[#746875] sm:text-base">
-          Luangkan waktu sejenak untuk mencatat pengalaman tubuh,
-          aktivitas, dan situasi lingkungan yang kamu alami hari ini.
-        </p>
-
-        {/* Environment information */}
-        <div className="mt-7 rounded-2xl border border-[#F0E3E9] bg-white p-4 sm:p-5">
-          <div className="flex items-start gap-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#F8E8EF] text-[#B84E73]">
-              <span className="text-lg">☀</span>
-            </div>
-
-            <div className="min-w-0 flex-1">
-              <p className="text-sm font-bold text-[#332A35]">
-                Konteks lingkungan
-              </p>
-
-              {environmentLoading ? (
-                <p className="mt-1 text-sm text-[#746875]">
-                  Mengambil data lingkungan...
-                </p>
-              ) : environmentError ? (
-                <p className="mt-1 text-sm text-red-600">
-                  {environmentError}
-                </p>
-              ) : (
-                <p className="mt-1 text-sm leading-6 text-[#52745A]">
-                  <span className="mr-1">✓</span>
-                  Data lingkungan berhasil disiapkan untuk check-in.
-                </p>
-              )}
-            </div>
+          <div className="mb-5 flex items-center gap-2">
+            <span className="rounded-full bg-[#F8E8EF] px-3 py-1 text-xs font-bold tracking-wide text-[#B84E73]">
+              HEALTH TRACKER
+            </span>
+            <span className="text-xs text-[#8A7B87]">
+              Catatan kesehatan personal
+            </span>
           </div>
 
-          <p className="mt-3 border-t border-[#F0E3E9] pt-3 text-xs leading-5 text-[#8A7B87]">
-            Informasi lingkungan membantu memahami konteks aktivitas,
-            bukan untuk menentukan diagnosis kesehatan.
+          <h1 className="max-w-2xl text-2xl font-bold leading-snug text-[#332A35] sm:text-3xl">
+            Bagaimana keadaan tubuhmu hari ini?
+          </h1>
+
+          <p className="mt-3 max-w-2xl text-sm leading-7 text-[#746875] sm:text-base">
+            Luangkan waktu sejenak untuk mencatat pengalaman tubuh,
+            aktivitas, dan situasi lingkungan yang kamu alami hari ini.
           </p>
-        </div>
-      </section>
+
+          {/* Environment information */}
+          <div className="mt-7">
+            <HealthTrackerLocationPicker />
+
+            {environmentLoading &&
+              (environmentLocation?.coordinates || environmentLocation?.adm4) ? (
+                <p className="text-sm text-[#746875]">
+                  Sedang menyiapkan data lingkungan...
+                </p>
+              ) : !environmentLoading && environmentError && environmentLocation?.adm4 ? (
+                <p className="text-sm text-[#746875]">
+                  {environmentError}
+                </p>
+              ) : snapshot ? (
+                <p className="text-sm text-[#52745A]">
+                  Data lingkungan berhasil disiapkan.
+                </p>
+              ) : null}
+
+            <p className="mt-3 text-xs leading-5 text-[#8A7B87]">
+              Informasi lingkungan membantu memahami konteks aktivitas,
+              bukan untuk menentukan diagnosis kesehatan.
+            </p>
+          </div>
+        </section>
+      )}
 
       {/* Assessment */}
       <section className="rounded-3xl border border-[#F0E3E9] bg-white p-5 sm:p-7">
@@ -303,30 +303,32 @@ export default function HealthTrackerAssessment() {
           )}
 
           {/* Review Jawaban */}
-          {currentStep === reviewStep && (
+          {currentStep === reviewStep && !isAILoading && (
             <ReviewScreen
-              conditionLabel={
-                CONDITION_OPTIONS.find(
-                  (item) => item.value === condition
-                )?.label || "Belum dipilih"
-              }
+              conditionLabel={conditionLabel}
               summaryQuestions={summaryQuestions}
               renderSummaryItem={renderSummaryItem}
               story={story}
             />
           )}
 
+          {/* Loading AI */}
+          {currentStep === reviewStep && isAILoading && (
+            <LoadingAIScreen
+              onComplete={handleAIComplete}
+            />
+          )}
+
           {/* Step 5: Summary */}
           {currentStep === summaryStep && (
             <SummaryScreen
-              conditionLabel={
-                CONDITION_OPTIONS.find(
-                  (item) => item.value === condition
-                )?.label || "Belum dipilih"
-              }
+              conditionLabel={conditionLabel}
               summaryQuestions={summaryQuestions}
-              renderSummaryItem={renderSummaryItem}
+              answers={answers}
+              scores={scores}
+              condition={condition}
               story={story}
+              snapshot={snapshot}
             />
           )}
         </div>
@@ -351,64 +353,73 @@ export default function HealthTrackerAssessment() {
         )}
 
         {/* Navigation */}
-        <div className="mt-8 flex flex-col-reverse gap-3 border-t border-[#F0E3E9] pt-5 sm:flex-row sm:items-center sm:justify-between">
-          <button
-            type="button"
-            onClick={handleBack}
-            disabled={currentStep === 0 || saving}
-            className="rounded-xl border border-[#EADDE3] px-5 py-3 text-sm font-semibold text-[#5F5360] transition hover:bg-[#FFF8FB] disabled:cursor-not-allowed disabled:opacity-40"
-          >
-            Kembali
-          </button>
+        {!isAILoading && (
+          <div className="mt-8 flex flex-col-reverse gap-3 border-t border-[#F0E3E9] pt-5 sm:flex-row sm:items-center sm:justify-between">
+            <button
+              type="button"
+              onClick={handleBack}
+              className="..."
+            >
+              Kembali
+            </button>
 
-          {currentStep === reviewStep ? (
-            <div className="flex flex-col gap-3 sm:flex-row">
-              <button
-                type="button"
-                onClick={handleContinueWithoutAI}
-                className="rounded-xl border border-[#B84E73] px-5 py-3 text-sm font-semibold text-[#8E3E5E] transition hover:bg-[#FFF8FB]"
-              >
-                Lanjut Tanpa AI
-              </button>
+            {currentStep === reviewStep ? (
+              <div className="flex flex-col gap-3 sm:flex-row">
+                <button
+                  type="button"
+                  onClick={handleContinueWithoutAI}
+                  className="rounded-xl border border-[#B84E73] px-5 py-3 text-sm font-semibold text-[#8E3E5E] transition hover:bg-[#FFF8FB]"
+                >
+                  Lanjut Tanpa AI
+                </button>
 
-              <button
-                type="button"
-                onClick={handleContinueWithAI}
-                className="rounded-xl bg-[#B84E73] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#8E3E5E]"
-              >
-                Lanjut dengan AI
-              </button>
-            </div>
-          ) : currentStep === summaryStep ? (
-            <div className="flex flex-col gap-3 sm:flex-row">
-              <button
-                type="button"
-                onClick={() => router.push("/healthtracker")}
-                disabled={saving}
-                className="rounded-xl border border-[#B84E73] px-5 py-3 text-sm font-semibold text-[#8E3E5E] transition hover:bg-[#FFF8FB] disabled:opacity-50"
-              >
-                Jangan Simpan
-              </button>
+                <button
+                  type="button"
+                  onClick={handleContinueWithAI}
+                  className="rounded-xl bg-[#B84E73] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#8E3E5E]"
+                >
+                  Lanjut dengan AI
+                </button>
+              </div>
+            ) : currentStep === summaryStep ? (
+              <div className="flex flex-col gap-3 sm:flex-row">
+                <button
+                  type="button"
+                  onClick={() => router.push("/healthtracker")}
+                  disabled={saving}
+                  className="rounded-xl border border-[#B84E73] px-5 py-3 text-sm font-semibold text-[#8E3E5E] transition hover:bg-[#FFF8FB] disabled:opacity-50"
+                >
+                  Jangan Simpan
+                </button>
 
-              <button
-                type="button"
-                onClick={handleSubmit}
-                disabled={saving}
-                className="rounded-xl bg-[#B84E73] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[#8E3E5E] disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                {saving ? "Menyimpan..." : "Simpan Check-In"}
-              </button>
-            </div>
-          ) : currentStep === 2 || currentStep === 3 ? (
-            <div className="flex gap-3">
-              <button
-                type="button"
-                onClick={() => setCurrentStep(currentStep === 2 ? 3 : storyStep)}
-                className="rounded-xl border border-[#B84E73] px-5 py-3 text-sm font-semibold text-[#8E3E5E] transition hover:bg-[#FFF8FB]"
-              >
-                Lewati
-              </button>
+                <button
+                  type="button"
+                  onClick={handleSubmit}
+                  disabled={saving}
+                  className="rounded-xl bg-[#B84E73] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[#8E3E5E] disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {saving ? "Menyimpan..." : "Simpan Check-In"}
+                </button>
+              </div>
+            ) : currentStep === 2 || currentStep === 3 ? (
+              <div className="flex gap-3">
+                <button
+                  type="button"
+                  onClick={() => setCurrentStep(currentStep === 2 ? 3 : storyStep)}
+                  className="rounded-xl border border-[#B84E73] px-5 py-3 text-sm font-semibold text-[#8E3E5E] transition hover:bg-[#FFF8FB]"
+                >
+                  Lewati
+                </button>
 
+                <button
+                  type="button"
+                  onClick={handleNext}
+                  className="rounded-xl bg-[#B84E73] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#8E3E5E]"
+                >
+                  Lanjutkan
+                </button>
+              </div>
+            ) : (
               <button
                 type="button"
                 onClick={handleNext}
@@ -416,17 +427,9 @@ export default function HealthTrackerAssessment() {
               >
                 Lanjutkan
               </button>
-            </div>
-          ) : (
-            <button
-              type="button"
-              onClick={handleNext}
-              className="rounded-xl bg-[#B84E73] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#8E3E5E]"
-            >
-              Lanjutkan
-            </button>
-          )}
-        </div>
+            )}
+          </div>
+        )}
       </section>
     </main>
   );

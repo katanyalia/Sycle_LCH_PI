@@ -24,6 +24,16 @@ export default function SummaryQuestionCard({
 
   const value = answers[question.code];
 
+  const answerLabel =
+  question.type === "scale"
+    ? getLabel(
+        HEALTH_TRACKER_SCALE.find(
+          (option) =>
+            String(getValue(option)) === String(value)
+        )
+      ) || "Belum diisi"
+    : getAnswerLabel(question, answers);
+
   const isAnswered =
     Array.isArray(value)
       ? value.length > 0
@@ -58,16 +68,12 @@ export default function SummaryQuestionCard({
   return (
     <Card className="rounded-xl border border-[#F0E3E9] bg-white py-0 shadow-none">
       <CardContent className="p-4">
-        <p className="text-xs font-semibold text-[#B84E73]">
-          {question.code}
-        </p>
-
         <p className="mt-1 text-sm font-semibold text-[#332A35]">
           {question.question}
         </p>
 
         <p className="mt-2 text-sm leading-6 text-[#5F5360]">
-          {getAnswerLabel(question, answers)}
+          {answerLabel}
         </p>
 
         {/* Keterangan Lainnya */}

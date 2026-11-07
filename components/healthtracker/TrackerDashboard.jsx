@@ -1,3 +1,7 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
   Heart,
@@ -21,7 +25,7 @@ function StatCard({ label, value, description, icon: Icon }) {
           {label}
         </p>
 
-        <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#F8E8EF] text-[#B84E73]">
+        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#F8E8EF] text-[#B84E73]">
           <Icon size={21} strokeWidth={1.8} />
         </div>
       </div>
@@ -40,7 +44,18 @@ function StatCard({ label, value, description, icon: Icon }) {
 export default function TrackerDashboard({
   entries = [],
   loadError = "",
+  displayName = "Teman SYCLE",
+  isNewUser = false,
 }) {
+  const router = useRouter();
+  const [showWelcome] = useState(isNewUser);
+
+  useEffect(() => {
+    if (isNewUser) {
+      router.replace("/healthtracker", { scroll: false });
+    }
+  }, [isNewUser, router]);
+
   const latestEntry = entries[0] ?? null;
 
   const totalCheckIns = entries.length;
@@ -48,22 +63,23 @@ export default function TrackerDashboard({
 
   return (
     <main className="mx-auto w-full max-w-6xl px-5 py-8 sm:px-6 sm:py-10">
-
       {/* HEADER */}
       <header className="mb-8">
-        <div className="mb-3 flex items-center gap-2">
-          <span className="h-1.5 w-1.5 rounded-full bg-[#B84E73]" />
-          <p className="text-xs font-extrabold uppercase tracking-[0.16em] text-[#B84E73]">
-            Ruang Kesehatanmu
-          </p>
-        </div>
+        <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-center">
+          <div className="min-w-0">
+            {/* GREETING */}
+            <p className="mb-2 text-sm font-semibold text-[#8E3E5E]">
+              {showWelcome
+                ? `Selamat datang di SYCLE, ${displayName}! 👋`
+                : `Senang melihatmu kembali, ${displayName}! 👋`}
+            </p>
 
-        <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
-          <div>
+            {/* TITLE */}
             <h1 className="text-3xl font-extrabold tracking-tight text-[#332A35] sm:text-4xl">
               Health Tracker
             </h1>
 
+            {/* DESCRIPTION */}
             <p className="mt-3 max-w-2xl text-sm leading-7 text-[#6F6570] sm:text-base">
               Kenali pola tubuhmu melalui catatan kesehatan,
               aktivitas sehari-hari, dan pengalaman lingkungan
@@ -71,6 +87,7 @@ export default function TrackerDashboard({
             </p>
           </div>
 
+          {/* ICON */}
           <div className="hidden h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-[#F8E8EF] text-[#B84E73] sm:flex">
             <Heart size={28} strokeWidth={1.5} />
           </div>
@@ -137,7 +154,7 @@ export default function TrackerDashboard({
           <StatCard
             label="Total Check-In"
             value={totalCheckIns}
-            description="Catatan kesehatan tersimpan"
+            description="Seluruh catatan kesehatan yang tersimpan"
             icon={ClipboardList}
           />
 
@@ -147,7 +164,7 @@ export default function TrackerDashboard({
             description={
               latestEntry
                 ? "Tanggal pencatatan terakhirmu"
-                : "Mulai catat kondisi tubuhmu"
+                : "Belum ada aktivitas pencatatan"
             }
             icon={CalendarDays}
           />
@@ -174,35 +191,43 @@ export default function TrackerDashboard({
 
         {latestEntry ? (
           <div className="p-6 sm:p-7">
-            <p className="text-sm font-medium text-[#8A7D89]">
-              {latestEntry.date}
-            </p>
+            {/* DATE */}
+            <div className="flex items-center gap-2 text-[#B84E73]">
+              <CalendarDays size={17} />
 
-            <h3 className="mt-2 text-2xl font-extrabold text-[#332A35]">
+              <p className="text-base font-extrabold sm:text-lg">
+                {latestEntry.date}
+              </p>
+            </div>
+
+            {/* CONDITION */}
+            <h3 className="mt-4 text-2xl font-extrabold tracking-tight text-[#332A35]">
               {latestEntry.condition || "Check-In Harian"}
             </h3>
 
-            <div className="mt-5 flex flex-wrap gap-2">
-              {latestEntry.activity && (
-                <span className="rounded-full bg-[#F8E8EF] px-4 py-2 text-xs font-bold text-[#8E3E5E]">
-                  Aktivitas: {latestEntry.activity}
-                </span>
-              )}
+            <p className="mt-2 text-sm leading-6 text-[#8A7D89]">
+              Catatan kondisi dan pengalaman kesehatanmu.
+            </p>
 
-              {latestEntry.comfort && (
-                <span className="rounded-full bg-[#E9F2EA] px-4 py-2 text-xs font-bold text-[#426B4A]">
-                  Kenyamanan: {latestEntry.comfort}
-                </span>
-              )}
-            </div>
+            {/* ACTIVITY & COMFORT */}
+            {(latestEntry.activity || latestEntry.comfort) && (
+              <div className="mt-5 flex flex-wrap gap-2">
+                {latestEntry.activity && (
+                  <span className="inline-flex items-center gap-2 rounded-full bg-[#F8E8EF] px-4 py-2 text-xs font-bold text-[#8E3E5E]">
+                    <Activity size={14} />
+                    {latestEntry.activity}
+                  </span>
+                )}
 
-            <Link
-              href="/healthtracker/history"
-              className="mt-7 inline-flex items-center gap-2 text-sm font-extrabold text-[#B84E73] transition-colors hover:text-[#8E3E5E]"
-            >
-              Lihat Detail Riwayat
-              <ArrowUpRight size={17} />
-            </Link>
+                {latestEntry.comfort && (
+                  <span className="inline-flex items-center gap-2 rounded-full bg-[#E9F2EA] px-4 py-2 text-xs font-bold text-[#426B4A]">
+                    <Heart size={14} />
+                    {latestEntry.comfort}
+                  </span>
+                )}
+              </div>
+            )}
+
           </div>
         ) : (
           <div className="px-6 py-10 text-center sm:px-10">
@@ -230,41 +255,26 @@ export default function TrackerDashboard({
         />
 
         <div className="relative z-10">
-          <div className="flex flex-col justify-between gap-6 sm:flex-row sm:items-center">
+          <div className="flex items-start gap-3">
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-white/80 text-[#426B4A]">
+              <Sprout size={22} />
+            </div>
+
             <div className="max-w-xl">
-              <div className="flex items-center gap-2">
-                <Sprout size={17} className="text-[#426B4A]" />
+              <p className="text-[11px] font-extrabold tracking-[0.14em] text-[#426B4A]">
+                PERJALANANMU
+              </p>
 
-                <p className="text-[11px] font-extrabold tracking-[0.14em] text-[#426B4A]">
-                  PERJALANANMU
-                </p>
-              </div>
-
-              <h2 className="mt-3 text-xl font-extrabold text-[#332A35] sm:text-2xl">
+              <h2 className="mt-2 text-xl font-extrabold text-[#332A35] sm:text-2xl">
                 Setiap Catatan Punya Cerita
               </h2>
 
               <p className="mt-3 text-sm leading-7 text-[#5F7162]">
-                Lihat kembali pengalaman tubuh, aktivitas,
-                dan kondisi lingkungan yang menyertai
-                keseharianmu dari waktu ke waktu.
+                Setiap check-in menyimpan pengalaman yang
+                berbeda. Lihat kembali catatanmu untuk
+                memahami perubahan kondisi tubuh, aktivitas,
+                dan lingkungan dari waktu ke waktu.
               </p>
-            </div>
-
-            <div className="flex shrink-0 items-center gap-3 rounded-2xl border border-[#D7E6D9] bg-white/70 p-4">
-              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#E9F2EA] text-[#426B4A]">
-                <Activity size={22} />
-              </div>
-
-              <div>
-                <p className="text-2xl font-extrabold text-[#426B4A]">
-                  {totalCheckIns}
-                </p>
-
-                <p className="text-xs font-semibold text-[#5F7162]">
-                  Catatan tersimpan
-                </p>
-              </div>
             </div>
           </div>
 
@@ -302,7 +312,6 @@ export default function TrackerDashboard({
           atau pengganti konsultasi tenaga kesehatan.
         </p>
       </footer>
-
     </main>
   );
 }
