@@ -6,7 +6,7 @@
 
 Welcome to the official repository of our **Perempuan Inovasi GENerasi AI Capstone Project**.
 
-Our team consists of four developers participating in the AI Full Stack Web Development program. Together, we developed **SYCLE**, a digital platform that integrates women's reproductive health, environmental awareness, and artificial intelligence.
+Our team consists of three developers participating in the AI Full Stack Web Development program. Together, we developed **SYCLE**, a digital platform that integrates women's reproductive health, environmental awareness, and artificial intelligence.
 
 ---
 
