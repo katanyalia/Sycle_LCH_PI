@@ -59,15 +59,11 @@ SYCLE is developed as a full-stack web application with an integrated AI-powered
 - Frontend: Next.js, React.js
 - Backend: Next.js Server Actions / API Routes and FastAPI
 - Database & Authentication: Supabase
+- Local Offline Storage: IndexedDB
 - AI Integration: Retrieval-Augmented Generation (RAG)
 - Environment Data: BMKG, KLH/BPLH, and Open-Meteo
 
-![SYCLE System Architecture]()
-
 ---
-
-## Repositories
-
 
 ## Repositories
 
@@ -133,5 +129,7 @@ SYCLE uses environmental and educational data sources to provide contextual info
 ## Deployment
 
 SYCLE is developed as a Progressive Web Application (PWA), allowing users to access the platform through supported web browsers and install it on compatible mobile devices.
+
+The application also uses IndexedDB for local offline data storage, helping users access supported locally stored data when an internet connection is unavailable.
 
 **Application Link:** [Open SYCLE](https://sycle-eta.vercel.app)
