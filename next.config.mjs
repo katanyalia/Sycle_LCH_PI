@@ -1,21 +1,10 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Indikator dev Next.js disembunyikan agar tidak menutupi navigasi bawah ponsel saat review.
+  /* config options here */
+  cacheComponents: true,
+  // Sembunyikan tombol Next.js Dev Tools (lingkaran "N") saat npm run dev. Tidak berpengaruh di production.
   devIndicators: false,
-  // cacheComponents & partialPrefetching (bawaan create-next-app) sengaja tidak diaktifkan
-  // agar perilaku data fetching & revalidatePath sama dengan materi mentor.
-  // Tahap 8 (K-06): service worker selalu diperiksa ulang agar versi baru cepat terpasang.
-  async headers() {
-    return [
-      {
-        source: "/sw.js",
-        headers: [
-          { key: "Cache-Control", value: "no-cache, no-store, must-revalidate" },
-          { key: "Service-Worker-Allowed", value: "/" },
-        ],
-      },
-    ];
-  },
+  partialPrefetching: true,
   turbopack: {
     rules: {
       "*.css": {

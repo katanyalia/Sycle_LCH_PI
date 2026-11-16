@@ -1,0 +1,25 @@
+# Secrets and environment variables
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Generated data and sensitive documents
+data/*
+!data/processed/
+data/processed/*
+!data/processed/.gitkeep
+
+# Google Service Account credentials
+credentials/
+
+# Logs
+*.log
+
+# macOS
+.DS_Store

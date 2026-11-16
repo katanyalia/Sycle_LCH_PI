@@ -1,62 +1,60 @@
-import { Open_Sans } from "next/font/google";
-import { SiteHeader } from "@/components/layout/SiteHeader";
-import { SiteFooter } from "@/components/layout/SiteFooter";
-import { MobileNav } from "@/components/layout/MainNav";
-import { EnvironmentProvider } from "@/context/EnvironmentContext";
-import { PersonalizationProvider } from "@/context/PersonalizationContext";
-import { TrackerDraftProvider } from "@/context/TrackerDraftContext";
-import { getCurrentUser } from "@/lib/auth/session";
-import { ServiceWorkerRegister } from "@/components/pwa/ServiceWorkerRegister";
-import "./globals.css";
 
-// Font LOCKED: Open Sans (Master Draft 1.6).
-const openSans = Open_Sans({
-  variable: "--font-open-sans",
-  subsets: ["latin"],
-  display: "swap",
-});
+import "./globals.css";
+import { AssessmentProvider } from "@/context/AssessmentContext";
+import { Suspense } from "react";
+
+import Navbar from "@/components/layout/Navbar";
+import Footer from "@/components/layout/Footer";
+import ChatWidget from "@/components/home/ChatWidget";
+import { ServiceWorkerRegister } from "@/components/pwa/ServiceWorkerRegister";
+import { TrackerOfflineSync } from "@/components/pwa/TrackerOfflineSync";
+import { BrandTitleGuard } from "@/components/pwa/BrandTitleGuard";
 
 export const metadata = {
-  title: {
-    default: "SYCLE V2 — Kenali Lingkunganmu, Proteksi Awalmu.",
-    template: "%s · SYCLE V2",
+  title: "Sycle — Lingkungan, tubuh, dan cerita harianmu",
+  description: "Catatan kesehatan perempuan dan konteks lingkungan.",
+  // Ikon dan mode aplikasi saat SYCLE ditambahkan ke Home Screen iPhone/iPad (PWA).
+  icons: {
+    icon: [
+      { url: "/icons/icon-192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icons/icon-512.png", sizes: "512x512", type: "image/png" },
+    ],
+    apple: [{ url: "/icons/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
   },
-  description:
-    "SYCLE membantu perempuan memahami kondisi lingkungan, memperoleh edukasi kesehatan berbasis bukti, dan mencatat pengalaman tubuh secara sukarela.",
-  applicationName: "SYCLE V2",
-  icons: { apple: "/icons/apple-touch-icon.png" },
-  appleWebApp: { capable: true, title: "SYCLE", statusBarStyle: "default" },
+  appleWebApp: {
+    capable: true,
+    title: "SYCLE",
+    statusBarStyle: "default",
+  },
 };
 
+// Warna bilah status/judul browser saat SYCLE dibuka sebagai aplikasi.
 export const viewport = {
-  themeColor: "#fff8fb",
+  themeColor: "#FFF8FB",
+  colorScheme: "only light",
 };
 
-export default async function RootLayout({ children }) {
-  // Pemilik draf Tracker: draf dikosongkan bila akun berganti/logout.
-  const user = await getCurrentUser();
+export default function RootLayout({ children }) {
   return (
-    <html lang="id" className={`${openSans.variable} h-full antialiased`}>
-      <body className="flex min-h-full flex-col pb-20 lg:pb-0">
-        <a
-          href="#konten-utama"
-          className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:bg-card focus:px-4 focus:py-2 focus:shadow"
-        >
-          Lompat ke konten utama
-        </a>
-        <EnvironmentProvider>
-          <PersonalizationProvider>
-          <TrackerDraftProvider userId={user?.id ?? null}>
-          <SiteHeader />
-          <main id="konten-utama" className="flex-1">
-            {children}
-          </main>
-          <SiteFooter />
-          <MobileNav />
+    <html lang="id">
+      <body>
+        <AssessmentProvider>
+          <Suspense fallback={null}>
+            <Navbar />
+          </Suspense>
+
+          <main>{children}</main>
+
+          <Footer />
+
+          <ChatWidget />
+
           <ServiceWorkerRegister />
-          </TrackerDraftProvider>
-          </PersonalizationProvider>
-        </EnvironmentProvider>
+
+          <TrackerOfflineSync />
+
+          <BrandTitleGuard />
+        </AssessmentProvider>
       </body>
     </html>
   );

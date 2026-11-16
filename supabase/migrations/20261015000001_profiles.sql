@@ -5,7 +5,7 @@
 -- Cara menjalankan (setelah disetujui): Supabase Dashboard → SQL Editor → New query →
 -- tempel seluruh isi file ini → Run. Aman dijalankan ulang (idempotent).
 --
--- Prinsip (Master Draft 6.4, CLAUDE.md §7):
+-- Prinsip (Master Draft 6.4, Panduan Proyek §7):
 --   * Identitas akun ada di auth.users (dikelola Supabase Auth).
 --   * profiles hanya menyimpan nama tampilan; tidak ada data kesehatan di sini.
 --   * RLS wajib aktif: setiap Member hanya dapat membaca & mengubah profilnya sendiri.

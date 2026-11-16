@@ -1,100 +1,1873 @@
+/* ==================================================
+   1. FONTS & DESIGN TOKENS
+================================================== */
+
+@import url("https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;500;600;700;800&family=Nunito:wght@400;500;600;700;800;900&display=swap");
+
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-open-sans);
-  --font-heading: var(--font-open-sans);
-  --color-ring: var(--ring);
-  --color-input: var(--input);
-  --color-border: var(--border);
-  --color-destructive: var(--destructive);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-accent: var(--accent);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-muted: var(--muted);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-secondary: var(--secondary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-primary: var(--primary);
-  --color-primary-pressed: var(--primary-pressed);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-popover: var(--popover);
-  --color-card-foreground: var(--card-foreground);
-  --color-card: var(--card);
-  /* Warna pendukung SYCLE (Master Draft 1.6) */
-  --color-blush: var(--blush);
-  --color-sage: var(--sage);
-  --color-lavender: var(--lavender);
-  --color-powder: var(--powder);
-  --radius-sm: calc(var(--radius) * 0.6);
-  --radius-md: calc(var(--radius) * 0.8);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) * 1.4);
-  --radius-2xl: calc(var(--radius) * 1.8);
-  --radius-3xl: calc(var(--radius) * 2.2);
-  --radius-4xl: calc(var(--radius) * 2.6);
-}
+@custom-variant dark (&:is(.dark *));
 
-/*
- * Palet LOCKED (Master Draft 1.6). Rose dipakai untuk tombol/merek, BUKAN untuk menandai
- * kondisi lingkungan berbahaya — warna kategori indikator memakai standar masing-masing.
- * Semua pasangan teks/latar di bawah sudah dicek kontras WCAG AA (>= 4.5:1).
- */
 :root {
-  --background: #fff8fb; /* Off-white pink */
-  --foreground: #332a35; /* Dark plum */
+  --background: #fff8fb;
+  --foreground: #332a35;
+
+  --primary: #b84e73;
+  --primary-foreground: #ffffff;
+
+  --secondary: #f8e8ef;
+  --secondary-foreground: #332a35;
+
   --card: #ffffff;
   --card-foreground: #332a35;
+
   --popover: #ffffff;
   --popover-foreground: #332a35;
-  --primary: #b84e73; /* Rose */
-  --primary-pressed: #8e3e5e; /* Dark rose */
-  --primary-foreground: #ffffff;
-  --secondary: #f8e8ef; /* Blush */
-  --secondary-foreground: #332a35;
+
   --muted: #f8e8ef;
-  --muted-foreground: #6b5a6e;
-  --accent: #eeeaf8; /* Lavender */
-  --accent-foreground: #332a35;
-  --destructive: #b42318;
-  --border: #ead8e1;
-  --input: #d9c3ce;
+  --muted-foreground: #766976;
+
+  --accent: #f8e8ef;
+  --accent-foreground: #8e3e5e;
+
+  --destructive: oklch(0.577 0.245 27.325);
+
+  --border: #f0dde5;
+  --input: #f0dde5;
   --ring: #b84e73;
-  --radius: 0.75rem;
+
+  --radius: 0.625rem;
+
+  /* Token tambahan SYCLE */
+  --primary-pressed: #8e3e5e;
   --blush: #f8e8ef;
+  --white: #ffffff;
+
   --sage: #e9f2ea;
+  --sage-border: #d7e6d9;
   --lavender: #eeeaf8;
-  --powder: #e8f1f7;
+  --powder-blue: #e8f1f7;
+
+  --radius-card: 22px;
+  --shadow-soft: 0 5px 24px rgb(120 70 90 / 6%);
+  --content-width: 1120px;
 }
 
-@layer base {
-  * {
-    @apply border-border outline-ring/50;
+/* ==================================================
+   2. BASE
+================================================== */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 80px;
+  /* SYCLE hanya punya tampilan terang; cegah browser/HP mode gelap mewarnai ulang halaman. */
+  color-scheme: only light;
+  background: var(--background);
+}
+
+body {
+  margin: 0;
+  background: var(--background);
+  color: var(--foreground);
+  font-family: "Nunito Sans", sans-serif;
+  line-height: 1.6;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+a {
+  color: inherit;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 3px;
+}
+
+.home-page {
+  width: 100%;
+  min-width: 0;
+  overflow-wrap: break-word;
+}
+
+.home-page > section {
+  min-width: 0;
+}
+
+/* ==================================================
+   3. NAVBAR
+================================================== */
+
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 20px;
+
+  width: 100%;
+  min-height: 60px;
+  padding: 6px 4%;
+
+  border-bottom: 1px solid var(--border);
+  background: rgb(255 248 251 / 96%);
+  backdrop-filter: blur(12px);
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  margin: 0;
+  text-decoration: none;
+}
+
+.brand-logo {
+  display: block;
+  width: 68px;
+  height: auto;
+  object-fit: contain;
+}
+
+.nav-menu {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  min-width: 0;
+}
+
+.nav-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 8px 10px;
+  border-radius: 9px;
+
+  color: #5f5360;
+  font-size: 0.84rem;
+  font-weight: 700;
+  white-space: nowrap;
+  text-decoration: none;
+
+  transition:
+    color 0.2s ease,
+    background 0.2s ease;
+}
+
+.nav-link:hover,
+.nav-link.nav-active {
+  background: var(--blush);
+  color: var(--primary);
+}
+
+.nav-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.nav-location {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+
+  padding: 8px 9px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+
+  color: #5f5360;
+  font-size: 0.78rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.nav-location svg {
+  flex-shrink: 0;
+  color: var(--primary);
+}
+
+.nav-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 8px 15px;
+  border: 1px solid var(--primary);
+  border-radius: 9px;
+  background: var(--primary);
+
+  color: var(--white);
+  font-size: 0.84rem;
+  font-weight: 800;
+  white-space: nowrap;
+  text-decoration: none;
+
+  transition:
+    border-color 0.2s ease,
+    background 0.2s ease;
+}
+
+.nav-button:hover,
+.nav-button.nav-button-active {
+  border-color: var(--primary-pressed);
+  background: var(--primary-pressed);
+}
+
+.nav-button.nav-button-outline {
+  background: var(--white);
+  color: var(--primary);
+}
+
+.nav-button.nav-button-outline:hover,
+.nav-button.nav-button-outline.nav-button-active {
+  border-color: var(--primary-pressed);
+  background: var(--blush);
+  color: var(--primary-pressed);
+}
+
+.nav-account {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  min-height: 40px;
+  padding: 8px 12px;
+
+  border: 1px solid #f0e3e9;
+  border-radius: 12px;
+
+  color: #6f5968;
+  font-weight: 800;
+  text-decoration: none;
+  white-space: nowrap;
+
+  transition:
+    background-color 200ms ease,
+    color 200ms ease,
+    border-color 200ms ease;
+}
+
+.nav-account:hover {
+  background-color: #f8e8ef;
+  border-color: #e8c4d2;
+  color: #b84e73;
+}
+
+.nav-account:focus-visible {
+  outline: 2px solid #b84e73;
+  outline-offset: 3px;
+}
+
+/* ==================================================
+   4. WEATHER, LOCATION & ACTIVITY DASHBOARD
+================================================== */
+
+.home-dashboard {
+  display: grid;
+  grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+  align-items: stretch;
+  gap: 20px;
+
+  width: 100%;
+  max-width: var(--content-width);
+  margin: 0 auto;
+  padding: 0 24px 48px;
+}
+
+.weather-column,
+.activity-column {
+  width: 100%;
+  min-width: 0;
+}
+
+.weather-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+
+  width: 100%;
+  min-width: 0;
+  height: 100%;
+}
+
+.weather-wrapper > .weather-card {
+  width: 100%;
+  min-width: 0;
+}
+
+/* ==================================================
+   5. LOCATION PANEL
+================================================== */
+
+.location-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  width: 100%;
+  min-width: 0;
+  padding: 18px;
+
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: var(--white);
+  box-shadow: var(--shadow-soft);
+}
+
+.location-panel > label {
+  display: block;
+  color: var(--foreground);
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.location-panel > input {
+  width: 100%;
+  min-width: 0;
+  padding: 11px 13px;
+
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--background);
+  color: var(--foreground);
+
+  font-size: 13px;
+}
+
+.location-panel > input::placeholder {
+  color: #a092a0;
+}
+
+.location-panel > input:focus {
+  border-color: var(--primary);
+  outline: none;
+  box-shadow: 0 0 0 3px rgb(184 78 115 / 10%);
+}
+
+.location-panel > small {
+  display: block;
+  margin-top: -4px;
+
+  color: var(--muted-foreground);
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+.location-heading {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.location-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  width: 38px;
+  height: 38px;
+
+  border-radius: 12px;
+  color: var(--primary);
+  background: var(--blush);
+}
+
+.location-heading-text {
+  min-width: 0;
+}
+
+.location-heading-text label {
+  display: block;
+  color: var(--foreground);
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.location-heading-text p {
+  margin: 3px 0 0;
+  color: var(--muted-foreground);
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.location-input-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  min-width: 0;
+  padding: 0 12px;
+
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--background);
+}
+
+.location-input-icon {
+  flex-shrink: 0;
+  color: var(--primary);
+}
+
+.location-input-wrapper input {
+  width: 100%;
+  min-width: 0;
+  padding: 11px 0;
+
+  border: 0;
+  outline: none;
+  background: transparent;
+  color: var(--foreground);
+
+  font: inherit;
+  font-size: 13px;
+}
+
+.location-input-wrapper:focus-within {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgb(184 78 115 / 10%);
+}
+
+.location-search-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  padding: 6px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--primary);
+}
+
+.location-search-button:hover {
+  background: var(--blush);
+}
+
+.location-detect-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  width: 100%;
+  padding: 10px 14px;
+
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--white);
+  color: var(--primary);
+
+  font-size: 12px;
+  font-weight: 800;
+
+  transition: background 0.2s ease;
+}
+
+.location-detect-button:hover {
+  background: var(--blush);
+}
+
+.location-status {
+  margin: -3px 0 0;
+  color: var(--muted-foreground);
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+/* ==================================================
+   6. WEATHER CARD
+================================================== */
+
+.weather-card {
+  min-width: 0;
+  padding: 22px;
+
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  background: var(--white);
+  box-shadow: var(--shadow-soft);
+}
+
+.weather-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+
+  padding-bottom: 18px;
+  border-bottom: 1px solid #f3e8ed;
+}
+
+.weather-heading {
+  min-width: 0;
+}
+
+.weather-eyebrow {
+  margin-bottom: 5px;
+
+  color: var(--primary);
+  font-size: 0.68rem;
+  font-weight: 900;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.weather-location {
+  margin: 0;
+
+  color: var(--foreground);
+  font-family: "Nunito", sans-serif;
+  font-size: 20px;
+  font-weight: 900;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+.weather-region {
+  margin: 2px 0 0;
+  color: #716875;
+  font-size: 0.875rem;
+  font-weight: 400;
+}
+
+.weather-subtitle {
+  margin-top: 5px;
+  color: var(--muted-foreground);
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+.weather-datetime {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  flex-shrink: 0;
+  gap: 2px;
+
+  padding: 9px 10px;
+  border-radius: 12px;
+  background: #fff5f8;
+  text-align: right;
+}
+
+.datetime-label {
+  color: var(--muted-foreground);
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.weather-datetime strong {
+  color: var(--primary);
+  font-family: "Nunito", sans-serif;
+  font-size: 17px;
+  font-weight: 900;
+  line-height: 1.4;
+}
+
+.weather-datetime > span:last-child {
+  color: var(--muted-foreground);
+  font-size: 9px;
+}
+
+/* Suhu utama */
+
+.weather-main {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+
+  padding: 22px 0;
+}
+
+.weather-temperature {
+  min-width: 0;
+}
+
+.weather-sun {
+  margin-bottom: 4px;
+  font-size: 26px;
+  line-height: 1.3;
+}
+
+.temperature-value {
+  color: var(--foreground);
+  font-family: "Nunito", sans-serif;
+  font-size: clamp(38px, 4vw, 50px);
+  font-weight: 900;
+  line-height: 1.1;
+  letter-spacing: -0.04em;
+}
+
+.temperature-unit {
+  margin-left: 3px;
+  color: var(--muted-foreground);
+  font-size: 20px;
+  font-weight: 700;
+  vertical-align: top;
+}
+
+.weather-condition {
+  margin-top: 7px;
+  color: var(--foreground);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.weather-feels {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-self: center;
+
+  max-width: 48%;
+  min-width: 0;
+  padding: 8px 12px;
+  margin-left: 12px;
+
+  border: 1px solid #ebcad7;
+  border-radius: 15px;
+  background: #f8e8ef;
+}
+
+.weather-feels .feels-label {
+  display: block;
+  margin-bottom: 5px;
+
+  color: #716875;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.weather-feels strong,
+.weather-feels .feels-value {
+  display: block;
+  margin-top: 2px;
+
+  color: var(--primary);
+  font-family: "Nunito", sans-serif;
+  font-size: clamp(1.75rem, 3vw, 2.25rem);
+  font-weight: 900;
+  line-height: 1.15;
+  letter-spacing: -0.04em;
+}
+
+.feels-description {
+  display: block;
+  margin-top: 4px;
+
+  color: var(--muted-foreground);
+  font-size: 10px;
+  line-height: 1.5;
+}
+
+/* Metrik cuaca dan kualitas udara */
+
+.weather-metrics {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 9px;
+}
+
+.weather-metric {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+
+  min-width: 0;
+  padding: 16px;
+
+  border: 1px solid transparent;
+  border-radius: 20px;
+
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease,
+    border-color 180ms ease;
+}
+
+/* Warna setiap indikator */
+
+.metric-temperature {
+  background: #fff0f4;
+  border-color: #f6dce5;
+}
+
+.metric-humidity {
+  background: #edf6f0;
+  border-color: #dcebe0;
+}
+
+.metric-uv {
+  background: #f2edfb;
+  border-color: #e4daf6;
+}
+
+.metric-air-quality {
+  background: #edf5fa;
+  border-color: #dceaf3;
+}
+
+.metric-heat-index {
+  background: #FCEEF3;
+  border-color: #F2DCE5;
+}
+
+/* Ikon indikator */
+
+.metric-icon {
+  display: grid;
+  flex-shrink: 0;
+  place-items: center;
+
+  width: 28px;
+  height: 28px;
+
+  border-radius: 9px;
+  background: var(--blush);
+  font-size: 14px;
+}
+
+.metric-uv .metric-icon {
+  background: #fff0d8;
+}
+
+.metric-air-quality .metric-icon {
+  background: var(--sage);
+}
+
+.metric-pm25 .metric-icon {
+  background: var(--lavender);
+}
+
+/* Nilai dan deskripsi indikator */
+
+.metric-value {
+  color: var(--foreground);
+  font-family: "Nunito", sans-serif;
+  font-size: 16px;
+  font-weight: 900;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+.metric-description {
+  margin-top: 4px;
+  color: var(--muted-foreground);
+  font-size: 10px;
+  line-height: 1.5;
+}
+
+/* Status indikator */
+
+.metric-status {
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+
+  width: fit-content;
+  margin-top: 5px;
+  padding: 5px 10px;
+
+  border-radius: 999px;
+
+  font-size: 11px;
+  font-weight: 650;
+  line-height: 1.4;
+
+  transition: background-color 180ms ease;
+}
+
+.status-good {
+  color: #356747;
+  background: #e9f2ea;
+}
+
+.status-moderate {
+  color: #855811;
+  background: #fff0c9;
+}
+
+.status-high {
+  color: #a94d2b;
+  background: #fce1d5;
+}
+
+.status-danger {
+  color: #a52f49;
+  background: #f7dce4;
+}
+
+.status-unknown {
+  color: #766d78;
+  background: #eae6ed;
+}
+
+/* Sumber data */
+
+.temperature-source,
+.metric-source {
+  display: block;
+  margin-top: 4px;
+
+  color: #827985;
+  font-size: 9px;
+  font-weight: 400;
+  line-height: 1.4;
+}
+
+/* Peringatan lingkungan */
+
+.weather-notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+
+  margin-top: 16px;
+  padding: 13px;
+
+  border: 1px solid #f1dce5;
+  border-radius: 14px;
+  background: #fff4f7;
+
+  color: #6e4a5b;
+  font-size: 11px;
+  line-height: 1.7;
+}
+
+.notice-icon {
+  flex-shrink: 0;
+  font-size: 17px;
+}
+
+.weather-notice p {
+  margin: 0;
+}
+
+.weather-source {
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+
+  margin-top: 12px;
+
+  color: var(--muted-foreground);
+  font-size: 10px;
+  line-height: 1.7;
+}
+
+.source-indicator {
+  flex-shrink: 0;
+
+  width: 7px;
+  height: 7px;
+  margin-top: 6px;
+
+  border-radius: 50%;
+  background: #d7a7ba;
+}
+
+/* ==================================================
+   7. ACTIVITY SELECTOR & PANEL
+================================================== */
+
+.activity-column {
+  min-width: 0;
+  padding: 22px;
+
+  border: 1px solid var(--sage-border);
+  border-radius: var(--radius-card);
+  background: var(--sage);
+}
+
+.activity-column > * {
+  width: 100%;
+  max-width: none;
+  min-width: 0;
+}
+
+.activity-column > .panel {
+  height: 100%;
+  padding: 0;
+
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.panel {
+  min-width: 0;
+  padding: 24px;
+
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  background: var(--white);
+  box-shadow: var(--shadow-soft);
+}
+
+.panel h2,
+.panel h3 {
+  font-family: "Nunito", sans-serif;
+  font-weight: 900;
+  line-height: 1.3;
+}
+
+.panel h2 {
+  margin: 0;
+  font-size: 22px;
+}
+
+.panel h3 {
+  margin: 0;
+  font-size: 17px;
+}
+
+.panel p {
+  color: var(--muted-foreground);
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.spread {
+  justify-content: space-between;
+}
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+
+  padding: 5px 9px;
+  border-radius: 999px;
+  background: var(--blush);
+
+  color: var(--primary);
+  font-size: 10px;
+  font-weight: 800;
+}
+
+/* ==================================================
+   8. FOOTER
+================================================== */
+
+.footer {
+  margin-top: 48px;
+  padding: 32px 6% 20px;
+
+  border-top: 1px solid var(--border);
+  background: #fff1f6;
+  color: var(--foreground);
+}
+
+.footer-main {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 40px;
+
+  padding-bottom: 26px;
+}
+
+.footer-brand {
+  flex: 1;
+  min-width: 0;
+}
+
+.footer-logo {
+  display: inline-block;
+  margin-bottom: 8px;
+
+  color: var(--primary);
+  font-size: 23px;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+}
+
+.footer-brand p {
+  margin: 0;
+
+  color: #756571;
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.footer-info {
+  max-width: 380px;
+  text-align: right;
+}
+
+.footer-disclaimer {
+  margin: 0 0 8px;
+
+  color: #51434f;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.7;
+}
+
+.footer-preview {
+  margin: 0;
+
+  color: #8b7a86;
+  font-size: 11px;
+  line-height: 1.7;
+}
+
+.footer-healthcare-link {
+  color: #b84e73;
+  font-weight: 800;
+  white-space: nowrap;
+  text-underline-offset: 3px;
+}
+
+.footer-healthcare-link:hover {
+  color: #8e3e5e;
+  text-decoration: underline;
+}
+
+.footer-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+
+  padding-top: 16px;
+  border-top: 1px solid #ead5df;
+
+  color: #8b7a86;
+  font-size: 11px;
+}
+
+/* ==================================================
+   9. GENERAL ASSESSMENT
+================================================== */
+
+.assessment-page {
+  min-height: 100vh;
+  padding: 40px 20px 64px;
+  background: var(--background, #fff8fb);
+  color: var(--foreground, #332a35);
+}
+
+.assessment-container {
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.assessment-back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+
+  margin-bottom: 32px;
+
+  color: #765b6b;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.assessment-back-link:hover {
+  color: #b84e73;
+}
+
+.assessment-heading {
+  max-width: 680px;
+  margin: 0 auto 28px;
+  text-align: center;
+}
+
+.assessment-icon {
+  display: grid;
+  width: 60px;
+  height: 60px;
+  margin: 0 auto 18px;
+  place-items: center;
+
+  border-radius: 20px;
+  background: #f8e8ef;
+  color: #b84e73;
+}
+
+.assessment-eyebrow {
+  margin-bottom: 10px;
+
+  color: #b84e73;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+}
+
+.assessment-heading h1 {
+  margin: 0;
+  font-size: clamp(28px, 4vw, 42px);
+  line-height: 1.2;
+  letter-spacing: -1px;
+}
+
+.assessment-heading h1 span {
+  color: #b84e73;
+}
+
+.assessment-description {
+  max-width: 600px;
+  margin: 16px auto 0;
+
+  color: #756875;
+  font-size: 15px;
+  line-height: 1.8;
+}
+
+.activity-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+
+  padding: 18px 20px;
+  margin: 0 auto 32px;
+
+  border: 1px solid #f0d9e3;
+  border-radius: 18px;
+  background: #fff;
+}
+
+.activity-summary div {
+  display: grid;
+  gap: 5px;
+}
+
+.summary-label {
+  color: #847584;
+  font-size: 12px;
+}
+
+.activity-summary strong {
+  font-size: 15px;
+}
+
+.activity-summary-check {
+  display: grid;
+  width: 36px;
+  height: 36px;
+  place-items: center;
+
+  border-radius: 50%;
+  background: #e9f2ea;
+  color: #497454;
+}
+
+.condition-section {
+  margin-bottom: 28px;
+}
+
+.section-heading {
+  margin-bottom: 16px;
+}
+
+.section-heading h2 {
+  margin: 0 0 6px;
+  font-size: 21px;
+}
+
+.section-heading p {
+  margin: 0;
+  color: #847584;
+  font-size: 14px;
+}
+
+.condition-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.condition-card {
+  position: relative;
+
+  display: flex;
+  min-height: 230px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 16px;
+
+  padding: 22px;
+
+  border: 1.5px solid #f0e3eb;
+  border-radius: 20px;
+  background: #fff;
+  color: inherit;
+
+  text-align: left;
+  cursor: pointer;
+
+  transition:
+    border-color 180ms ease,
+    box-shadow 180ms ease,
+    transform 180ms ease;
+}
+
+.condition-card:hover {
+  transform: translateY(-3px);
+  border-color: #dca5bb;
+  box-shadow: 0 10px 28px rgb(184 78 115 / 8%);
+}
+
+.condition-card.is-selected {
+  border-color: #b84e73;
+  box-shadow: 0 0 0 3px rgb(184 78 115 / 10%);
+}
+
+.condition-icon {
+  display: grid;
+  width: 54px;
+  height: 54px;
+  flex-shrink: 0;
+  place-items: center;
+
+  border-radius: 17px;
+  color: #6e4c62;
+}
+
+.condition-card-content h3 {
+  margin: 0 0 8px;
+  font-size: 17px;
+}
+
+.condition-card-content p {
+  margin: 0;
+  color: #756875;
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.condition-radio {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+
+  display: grid;
+  width: 23px;
+  height: 23px;
+  place-items: center;
+
+  border: 1.5px solid #e4d4de;
+  border-radius: 50%;
+  color: #fff;
+}
+
+.condition-card.is-selected .condition-radio {
+  border-color: #b84e73;
+  background: #b84e73;
+}
+
+.assessment-navigation {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+
+  padding-top: 24px;
+  border-top: 1px solid #f0e3eb;
+}
+
+.assessment-navigation > p {
+  max-width: 390px;
+  margin: 0;
+
+  color: #847584;
+  font-size: 12px;
+  line-height: 1.7;
+}
+
+.required-mark {
+  color: #b84e73;
+}
+
+.assessment-next-button {
+  display: inline-flex;
+  min-height: 48px;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+
+  padding: 0 22px;
+
+  border: none;
+  border-radius: 14px;
+  background: #b84e73;
+  color: #fff;
+
+  font: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+
+  transition: background 180ms ease;
+}
+
+.assessment-next-button:hover {
+  background: #8e3e5e;
+}
+
+.assessment-next-button.is-disabled {
+  background: #dfcbd5;
+  cursor: not-allowed;
+}
+
+/* ==================================================
+   10. RESPONSIVE: TABLET
+================================================== */
+
+@media (max-width: 1000px) {
+  .header {
+    gap: 12px;
+    padding-right: 3%;
+    padding-left: 3%;
   }
-  body {
-    @apply bg-background text-foreground;
+
+  .brand-logo {
+    width: 62px;
   }
-  button:not(:disabled),
-  [role="button"]:not(:disabled) {
-    cursor: pointer;
+
+  .nav-menu {
+    gap: 2px;
   }
-  html {
-    @apply font-sans;
+
+  .nav-link {
+    padding: 8px 7px;
+    font-size: 0.79rem;
   }
-  /* Fokus keyboard selalu terlihat (Master Draft 7.9 A) */
-  :focus-visible {
-    outline: 2px solid var(--ring);
-    outline-offset: 2px;
+
+  .nav-actions {
+    gap: 6px;
+  }
+
+  .nav-location {
+    padding: 7px;
+    font-size: 0.74rem;
+  }
+
+  .nav-button {
+    padding: 8px 12px;
+    font-size: 0.8rem;
   }
 }
+
+@media (max-width: 900px) {
+  .hero {
+    gap: 28px;
+  }
+
+  .home-dashboard {
+    grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+    gap: 16px;
+  }
+
+  .weather-card {
+    padding: 18px;
+  }
+
+  .weather-header {
+    gap: 8px;
+  }
+
+  .weather-location {
+    font-size: 18px;
+  }
+
+  .weather-datetime {
+    padding: 8px;
+  }
+
+  .temperature-value {
+    font-size: clamp(36px, 4vw, 44px);
+  }
+
+  .weather-feels {
+    padding: 10px;
+  }
+
+  .weather-feels strong,
+  .weather-feels .feels-value {
+    font-size: 21px;
+  }
+
+  .activity-column {
+    padding: 18px;
+  }
+
+  .panel h2 {
+    font-size: 20px;
+  }
+}
+
+/* ==================================================
+   11. RESPONSIVE: SMALL TABLET
+================================================== */
+
+@media (max-width: 800px) {
+  .hero {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 32px;
+
+    min-height: auto;
+    padding-top: 48px;
+    padding-bottom: 48px;
+  }
+
+  .hero-art {
+    min-height: 320px;
+  }
+
+  .home-dashboard {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 20px;
+  }
+
+  .weather-card {
+    padding: 22px;
+  }
+
+  .weather-location {
+    font-size: 20px;
+  }
+
+  .temperature-value {
+    font-size: clamp(40px, 7vw, 50px);
+  }
+
+  .activity-column {
+    padding: 22px;
+  }
+}
+
+/* ==================================================
+   12. RESPONSIVE: MOBILE
+================================================== */
+
+@media (max-width: 700px) {
+  .header {
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 8px 12px;
+    padding: 9px 4%;
+  }
+
+  .brand-logo {
+    width: 64px;
+  }
+
+  .nav-actions {
+    justify-self: end;
+  }
+
+  .nav-menu {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+
+  .nav-link {
+    padding: 7px 9px;
+    font-size: 0.8rem;
+  }
+
+  .nav-location {
+    padding: 7px 8px;
+    font-size: 0.72rem;
+  }
+
+  .nav-button {
+    padding: 8px 12px;
+    font-size: 0.8rem;
+  }
+
+  .assessment-page {
+    padding: 24px 16px 40px;
+  }
+
+  .assessment-back-link {
+    margin-bottom: 26px;
+  }
+
+  .condition-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .condition-card {
+    min-height: auto;
+    flex-direction: row;
+    align-items: center;
+    padding: 18px;
+  }
+
+  .condition-card-content {
+    padding-right: 18px;
+  }
+
+  .condition-icon {
+    width: 48px;
+    height: 48px;
+  }
+
+  .assessment-navigation {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .assessment-next-button {
+    width: 100%;
+  }
+}
+
+@media (max-width: 640px) {
+  /* Navbar */
+
+  .header {
+    gap: 6px;
+    padding: 4px 12px;
+  }
+
+  .brand-logo {
+    width: 48px;
+  }
+
+  .nav-menu,
+  .header nav {
+    gap: 1px;
+  }
+
+  .nav-link,
+  .header nav > a:not(.nav-button):not(.brand) {
+    padding: 5px;
+    font-size: 0.76rem;
+  }
+
+  .nav-button {
+    padding: 5px 7px;
+    font-size: 0.68rem;
+  }
+
+  /* Hero */
+
+  .hero {
+    gap: 26px;
+    padding: 38px 16px;
+  }
+
+  .hero h1 {
+    font-size: clamp(2rem, 8vw, 2.8rem);
+  }
+
+  .lead {
+    font-size: 0.96rem;
+  }
+
+  .hero-art {
+    min-height: 290px;
+    border-radius: 26px;
+  }
+
+  .hero-circle {
+    width: 190px;
+    height: 190px;
+    font-size: 1.8rem;
+  }
+
+  .float-card {
+    padding: 9px 11px;
+    font-size: 0.72rem;
+  }
+
+  .float-top {
+    top: 20px;
+    left: 12px;
+  }
+
+  .float-bottom {
+    top: 20px;
+    right: 12px;
+  }
+
+  /* Dashboard */
+
+  .home-dashboard {
+    gap: 18px;
+    padding: 0 16px 36px;
+  }
+
+  .weather-wrapper {
+    gap: 12px;
+  }
+
+  .location-panel {
+    padding: 16px;
+    border-radius: 16px;
+  }
+
+  .location-heading {
+    gap: 10px;
+  }
+
+  .location-icon {
+    width: 36px;
+    height: 36px;
+  }
+
+  .activity-column {
+    padding: 18px;
+    border-radius: 18px;
+  }
+
+  /* Weather */
+
+  .weather-card {
+    padding: 18px;
+    border-radius: 18px;
+  }
+
+  .weather-header {
+    gap: 10px;
+    padding-bottom: 16px;
+  }
+
+  .weather-location {
+    font-size: 18px;
+  }
+
+  .weather-subtitle {
+    font-size: 11px;
+  }
+
+  .weather-datetime {
+    padding: 8px;
+  }
+
+  .weather-datetime strong {
+    font-size: 16px;
+  }
+
+  .weather-datetime > span:last-child {
+    font-size: 9px;
+  }
+
+  .weather-main {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .temperature-value {
+    font-size: clamp(36px, 9vw, 46px);
+  }
+
+  .temperature-unit {
+    font-size: 18px;
+  }
+
+  .weather-feels {
+    max-width: 48%;
+    min-width: 0;
+    margin-left: 12px;
+    padding: 8px 12px;
+  }
+
+  .weather-feels .feels-label {
+    color: #8e3e5e;
+    font-size: 11px;
+    font-weight: 600;
+  }
+
+  .feels-description {
+    margin-top: 4px;
+    color: #8e3e5e;
+    font-size: 14px;
+    font-weight: 800;
+    line-height: 1.4;
+  }
+
+  .weather-metrics {
+    gap: 8px;
+  }
+
+  .weather-metric {
+    gap: 7px;
+    padding: 10px;
+  }
+
+  .metric-value {
+    font-size: 15px;
+  }
+
+  .metric-description {
+    font-size: 10px;
+  }
+
+  .metric-pm25 .metric-value {
+    font-size: 14px;
+  }
+
+  .weather-notice {
+    gap: 8px;
+    padding: 12px;
+  }
+
+  /* Footer */
+
+  .footer {
+    margin-top: 32px;
+    padding: 26px 20px 18px;
+  }
+
+  .footer-main {
+    flex-direction: column;
+    gap: 22px;
+    padding-bottom: 22px;
+  }
+
+  .footer-info {
+    max-width: 100%;
+    text-align: left;
+  }
+
+  .footer-bottom {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+}
+
+/* ==================================================
+   13. RESPONSIVE: VERY SMALL MOBILE
+================================================== */
+
+@media (max-width: 380px) {
+  .header {
+    flex-wrap: wrap;
+  }
+
+  .nav-menu,
+  .header nav {
+    max-width: 100%;
+  }
+
+  .hero-art {
+    min-height: 260px;
+  }
+
+  .hero-circle {
+    width: 165px;
+    height: 165px;
+    font-size: 1.6rem;
+  }
+
+  .weather-card {
+    padding: 14px;
+  }
+
+  .weather-header {
+    flex-direction: column;
+  }
+
+  .weather-datetime {
+    align-items: flex-start;
+    text-align: left;
+  }
+
+  .weather-main {
+    align-items: flex-start;
+  }
+
+  .temperature-value {
+    font-size: 38px;
+  }
+
+  .weather-feels {
+    max-width: 52%;
+    padding: 9px;
+  }
+
+  .weather-feels strong,
+  .weather-feels .feels-value {
+    font-size: 19px;
+  }
+
+  .feels-description {
+    font-size: 9px;
+  }
+
+  .weather-metric {
+    padding: 9px;
+  }
+
+  .metric-value {
+    font-size: 14px;
+  }
+
+  .metric-pm25 .metric-value {
+    font-size: 13px;
+  }
+}
+
+/* ==================================================
+   14. ACCESSIBILITY: REDUCED MOTION
+================================================== */
 
 @media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
   *,
   *::before,
   *::after {
+    scroll-behavior: auto !important;
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;

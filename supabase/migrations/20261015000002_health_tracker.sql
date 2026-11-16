@@ -2,7 +2,7 @@
 -- SYCLE V2 — Migration 002: Health Tracker (catatan tersimpan) + RLS owner-only
 -- Tahap 6. DRAF — belum dijalankan; tunggu persetujuan pemilik proyek.
 --
--- Prinsip (Master Draft Tahap 3 & 6.4, CLAUDE.md §6–7):
+-- Prinsip (Master Draft Tahap 3 & 6.4, Panduan Proyek §6–7):
 --   * Catatan hanya dibuat oleh tindakan eksplisit "Simpan Catatan" (tidak ada autosave).
 --   * Kode jawaban persis Master Draft Tahap 3; jawaban cabang hanya boleh ada sesuai konteks.
 --   * Skala gangguan 0–4 per item; dilewati = NULL (bukan 0); tidak ada kolom skor total.

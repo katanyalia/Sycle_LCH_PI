@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#FFF8FB" />
-    <title>Koneksi tidak tersedia · SYCLE V2</title>
+    <title>Butuh internet · SYCLE</title>
     <style>
       :root { color-scheme: light; }
       body { margin: 0; min-height: 100vh; display: grid; place-items: center; background: #fff8fb; color: #332a35;
@@ -13,7 +13,8 @@
       img { width: 56px; height: 56px; border-radius: 12px; }
       h1 { font-size: 1.4rem; margin: 16px 0 8px; }
       p { line-height: 1.6; margin: 8px 0; }
-      .box { background: #e8f1f7; border-radius: 12px; padding: 12px 16px; font-size: 0.95rem; }
+      .box { background: #e9f2ea; border-radius: 12px; padding: 12px 16px; font-size: 0.95rem; }
+      .box.warn { background: #f8e8ef; }
       a, button { display: inline-flex; align-items: center; min-height: 44px; margin: 12px 8px 0 0; padding: 0 16px;
         border-radius: 10px; font: inherit; font-weight: 600; text-decoration: none; cursor: pointer; }
       button { background: #b84e73; color: #fff; border: 0; }
@@ -25,14 +26,22 @@
   <body>
     <main>
       <img src="/icons/icon-192.png" alt="Logo SYCLE" />
-      <h1>Koneksi tidak tersedia</h1>
-      <p>Halaman ini belum tersimpan untuk dibuka tanpa internet.</p>
+      <h1>Fitur ini butuh internet</h1>
+      <p>Halaman yang kamu buka memerlukan koneksi internet. Sambungkan internet, lalu tekan Coba Lagi.</p>
       <p class="box">
-        Halaman yang pernah kamu buka, seperti Beranda dan Info &amp; Edukasi, tetap dapat dibaca offline. Health Tracker,
-        Riwayat, dan Profil memerlukan koneksi internet agar datamu tetap aman.
+        <strong>Tetap bisa dibuka tanpa internet:</strong> Beranda, Kenali Aktivitasmu (panduan personal),
+        Info &amp; Edukasi, Glosarium, Panduan Perlindungan, Panduan Umum, faskes terdekat di Healthcare,
+        dan check-in Health Tracker (catatan disimpan di perangkat lalu dikirim otomatis saat online).
+      </p>
+      <p class="box warn">
+        <strong>Butuh internet:</strong> Refleksi AI, Riwayat, Profil, Masuk/Daftar, Tanya Sycle,
+        petunjuk arah dan peta, serta data lingkungan terbaru.
       </p>
       <button type="button" onclick="location.reload()">Coba Lagi</button>
-      <a href="/info-edukasi">Info &amp; Edukasi</a>
+      <a href="/">Beranda</a>
+      <a href="/assessment">Kenali Aktivitasmu</a>
+      <a href="/healthtracker/assessment">Check-in Health Tracker</a>
+      <a href="/education">Info &amp; Edukasi</a>
     </main>
   </body>
 </html>

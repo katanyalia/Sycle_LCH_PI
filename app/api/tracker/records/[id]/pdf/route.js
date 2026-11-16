@@ -36,7 +36,14 @@ export async function GET(_request, { params }) {
       },
     });
   } catch (error) {
-    console.error("PDF catatan gagal:", error?.name ?? "unknown");
-    return NextResponse.json({ error: "PDF belum berhasil dibuat. Coba lagi." }, { status: 500 });
+    console.error("PDF catatan gagal:", error);
+
+    return NextResponse.json(
+      {
+        error: "PDF belum berhasil dibuat. Coba lagi.",
+        detail: error?.message ?? "Unknown error",
+      },
+      { status: 500 }
+    );
   }
 }

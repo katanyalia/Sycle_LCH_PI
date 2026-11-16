@@ -1,0 +1,645 @@
+
+/* ========================================
+   PAGE LAYOUT
+======================================== */
+
+.page {
+  min-height: 100vh;
+  padding: 36px 32px 48px;
+  background: var(--background, #fff8fb);
+  color: var(--foreground, #332a35);
+}
+
+.container {
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+.pageHeader {
+  max-width: 680px;
+  margin-bottom: 28px;
+}
+
+.eyebrow {
+  margin: 0 0 8px;
+  color: var(--primary, #b84e73);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+}
+
+.pageTitle {
+  margin: 0;
+  font-size: clamp(27px, 3vw, 36px);
+  font-weight: 800;
+  line-height: 1.25;
+  letter-spacing: -0.035em;
+}
+
+.pageDescription {
+  margin: 10px 0 0;
+  color: #746573;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+/* ========================================
+   TWO-COLUMN LAYOUT
+======================================== */
+
+.layout {
+  display: grid;
+  grid-template-columns: minmax(280px, 340px) minmax(0, 1fr);
+  align-items: start;
+  gap: 24px;
+}
+
+.leftColumn,
+.rightColumn {
+  display: grid;
+  min-width: 0;
+  gap: 20px;
+}
+
+.leftColumn {
+  align-content: start;
+}
+
+.rightColumn {
+  align-content: start;
+}
+
+/* ========================================
+   SHARED PANELS
+======================================== */
+
+.panel {
+  min-width: 0;
+  padding: 22px;
+  border: 1px solid #f0dce5;
+  border-radius: 18px;
+  background: #fff;
+  box-shadow: 0 3px 12px rgb(51 42 53 / 3%);
+}
+
+.panelHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+.panelTitle {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 800;
+  line-height: 1.4;
+}
+
+.panelSubtitle {
+  margin: 5px 0 0;
+  color: #887482;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+/* ========================================
+   LOCATION SEARCH
+======================================== */
+
+.locationSection {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+}
+
+.fieldLabel {
+  display: block;
+  margin: 0;
+  color: #746573;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.locationButton,
+.resultButton {
+  display: flex;
+  width: 100%;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  padding: 11px 14px;
+  border: 0;
+  border-radius: 10px;
+  background: var(--primary, #b84e73);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 180ms ease;
+}
+
+.locationButton:hover,
+.resultButton:hover {
+  background: var(--primary-pressed, #8e3e5e);
+}
+
+.locationButton:disabled {
+  cursor: wait;
+  opacity: 0.7;
+}
+
+.orDivider {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #958694;
+  font-size: 11px;
+}
+
+.orDivider span {
+  height: 1px;
+  flex: 1;
+  background: #f0e3e9;
+}
+
+.locationInputWrap {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 10px;
+  padding: 0 12px;
+  border: 1px solid #e8dde4;
+  border-radius: 10px;
+  color: var(--primary, #b84e73);
+  transition:
+    border-color 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.locationInputWrap:focus-within {
+  border-color: var(--primary, #b84e73);
+  box-shadow: 0 0 0 3px rgb(184 78 115 / 10%);
+}
+
+.locationInputWrap input {
+  width: 100%;
+  min-width: 0;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: #332a35;
+  font: inherit;
+  font-size: 13px;
+}
+
+.locationInputWrap input::placeholder {
+  color: #a89aa5;
+}
+
+.successMessage,
+.errorMessage {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+.successMessage {
+  color: #54765b;
+}
+
+.errorMessage {
+  padding: 10px;
+  border-radius: 8px;
+  background: #fff1f1;
+  color: #a33e4d;
+}
+
+/* ========================================
+   SERVICE FILTERS
+======================================== */
+
+.filterSection {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.helperText {
+  margin: 8px 0 14px;
+  color: #887482;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.filterList {
+  display: grid;
+  gap: 8px;
+}
+
+.filterOption {
+  position: relative;
+  display: flex;
+  min-width: 0;
+  min-height: 48px;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 10px;
+  border: 1px solid #f0e7ec;
+  border-radius: 10px;
+  background: #fff;
+  cursor: pointer;
+  transition:
+    background 160ms ease,
+    border-color 160ms ease;
+}
+
+.filterOption:hover {
+  border-color: #d9a3b7;
+  background: #fffafc;
+}
+
+.filterActive {
+  border-color: #d9a3b7;
+  background: #fdf1f5;
+}
+
+.filterOption input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+
+.filterOption:focus-within {
+  outline: 2px solid #b84e73;
+  outline-offset: 2px;
+}
+
+.filterIcon {
+  display: flex;
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  background: #f8f3f6;
+  color: #887482;
+}
+
+.filterActive .filterIcon {
+  background: #f8e0e9;
+  color: #b84e73;
+}
+
+.filterText {
+  min-width: 0;
+  flex: 1;
+  color: #332a35;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+.checkIndicator {
+  display: flex;
+  width: 19px;
+  height: 19px;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #dccbd4;
+  border-radius: 5px;
+  color: #fff;
+  font-size: 12px;
+}
+
+.filterActive .checkIndicator {
+  border-color: #b84e73;
+  background: #b84e73;
+}
+
+/* ========================================
+   SEARCH ACTIONS
+======================================== */
+
+.actions {
+  display: grid;
+  gap: 8px;
+  margin-top: 20px;
+}
+
+.searchButton,
+.resetButton {
+  display: flex;
+  width: 100%;
+  min-height: 42px;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border: 0;
+  border-radius: 10px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    background 180ms ease,
+    color 180ms ease;
+}
+
+.searchButton {
+  background: var(--primary, #b84e73);
+  color: #fff;
+}
+
+.searchButton:hover {
+  background: var(--primary-pressed, #8e3e5e);
+}
+
+.resetButton {
+  background: transparent;
+  color: #746573;
+}
+
+.resetButton:hover {
+  background: #fff5f8;
+  color: #b84e73;
+}
+
+.privacyNote {
+  margin-top: 18px;
+  padding: 12px;
+  border-radius: 10px;
+  background: #fcf0f5;
+  color: #66515e;
+  font-size: 11px;
+  line-height: 1.7;
+}
+
+/* ========================================
+   MAP
+======================================== */
+
+.mapPanel {
+  min-width: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+.mapPanel .panelHeader {
+  margin: 0;
+  padding: 20px 22px;
+  border-bottom: 1px solid #f0e3e9;
+}
+
+.textLink {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 5px;
+  color: #b84e73;
+  font-size: 12px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.textLink:hover {
+  text-decoration: underline;
+}
+
+.mapViewport {
+  position: relative;
+  min-width: 0;
+  min-height: 360px;
+  background: #f1f3ef;
+}
+
+.mapViewport iframe {
+  display: block;
+  width: 100%;
+  height: 390px;
+  border: 0;
+}
+
+.mapPlaceholder {
+  display: flex;
+  min-height: 360px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 24px;
+  text-align: center;
+}
+
+.mapPlaceholderIcon {
+  display: flex;
+  width: 68px;
+  height: 68px;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 18px;
+  border-radius: 50%;
+  background: #f8e8ef;
+  color: #b84e73;
+}
+
+.mapPlaceholder h3,
+.emptyResults h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.mapPlaceholder p,
+.emptyResults p {
+  max-width: 360px;
+  margin: 9px 0 0;
+  color: #746573;
+  font-size: 13px;
+  line-height: 1.8;
+}
+
+/* ========================================
+   FACILITY RESULTS
+======================================== */
+
+.resultsPanel {
+  min-width: 0;
+  padding: 22px;
+}
+
+.resultsPanel .panelHeader {
+  margin-bottom: 16px;
+}
+
+.resultCard {
+  display: flex;
+  min-width: 0;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 16px;
+  border: 1px solid #e8dde4;
+  border-radius: 12px;
+  background: #fffafc;
+}
+
+.resultIcon {
+  display: flex;
+  width: 42px;
+  height: 42px;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  background: #e9f2ea;
+  color: #54765b;
+}
+
+.resultContent {
+  min-width: 0;
+  flex: 1;
+}
+
+.resultContent h3 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 1.6;
+}
+
+.resultMeta {
+  display: flex;
+  align-items: flex-start;
+  gap: 5px;
+  margin: 8px 0 0;
+  color: #746573;
+  font-size: 12px;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+.resultDescription {
+  margin: 7px 0 0;
+  color: #746573;
+  font-size: 12px;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+}
+
+.resultButton {
+  width: fit-content;
+  max-width: 100%;
+  margin-top: 14px;
+}
+
+.emptyResults {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 28px 16px;
+  border: 1px dashed #e8dde4;
+  border-radius: 12px;
+  background: #fffafc;
+  text-align: center;
+}
+
+.disclaimer {
+  margin: 16px 0 0;
+  color: #887482;
+  font-size: 11px;
+  line-height: 1.8;
+}
+
+/* ========================================
+   ANIMATION
+======================================== */
+
+.spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ========================================
+   RESPONSIVE
+======================================== */
+
+@media (max-width: 900px) {
+  .page {
+    padding: 28px 20px 40px;
+  }
+
+  .layout {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 20px;
+  }
+
+  .leftColumn,
+  .rightColumn {
+    gap: 18px;
+  }
+}
+
+@media (max-width: 480px) {
+  .page {
+    padding: 24px 14px 32px;
+  }
+
+  .pageHeader {
+    margin-bottom: 22px;
+  }
+
+  .pageTitle {
+    font-size: 27px;
+  }
+
+  .panel {
+    padding: 17px;
+    border-radius: 14px;
+  }
+
+  .mapPanel {
+    padding: 0;
+  }
+
+  .mapPanel .panelHeader {
+    padding: 17px;
+  }
+
+  .mapViewport,
+  .mapPlaceholder {
+    min-height: 280px;
+  }
+
+  .mapViewport iframe {
+    height: 300px;
+  }
+
+  .resultCard {
+    gap: 10px;
+    padding: 12px;
+  }
+
+  .resultButton {
+    width: 100%;
+    justify-content: center;
+  }
+}
