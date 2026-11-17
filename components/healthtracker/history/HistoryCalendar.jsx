@@ -138,13 +138,15 @@ function HistoryEntryCard({ entry }) {
             Lihat Detail
           </button>
 
-          <Link
+          {/* Tautan biasa, bukan <Link>: PDF adalah file, bukan halaman aplikasi. */}
+          <a
             href={`/api/tracker/records/${entry.id}/pdf`}
+            download
             className="inline-flex h-11 items-center justify-center gap-2 rounded-full border border-[#E8D5DE] bg-white px-5 text-sm font-bold text-[#8E3E5E] transition-colors duration-200 hover:border-[#B84E73] hover:bg-[#FFF8FB] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B84E73] focus-visible:ring-offset-2"
           >
             <Download size={14} />
             Unduh PDF
-          </Link>
+          </a>
 
           <DeleteHistoryButton recordId={entry.id} />
         </div>

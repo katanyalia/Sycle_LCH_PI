@@ -14,9 +14,21 @@ the of and to in a is for on what how
 """.split())
 
 
+# Istilah dua kata yang harus dibaca sebagai satu istilah, supaya
+# "heat stroke" tidak tercampur dengan "stroke" (stroke otak) di sumber lain.
+PHRASES = [
+    (re.compile(r"\bheat[\s-]?stroke\b"), " heatstroke "),
+    (re.compile(r"\bsengatan panas\b"), " heatstroke "),
+    (re.compile(r"\bserangan panas\b"), " heatstroke "),
+]
+
+
 def tokenize(text):
+    text = text.lower()
+    for pattern, replacement in PHRASES:
+        text = pattern.sub(replacement, text)
     return [
-        t for t in re.findall(r"\b\w+\b", text.lower())
+        t for t in re.findall(r"\b\w+\b", text)
         if t not in STOPWORDS
     ]
 
@@ -112,8 +124,13 @@ class HybridRetriever:
 
     def vector_search(self, query, where=None, topics=None):
 
+        # Awalan "query: " (format E5) hanya untuk pencarian Refleksi yang
+        # memakai filter topik. Tanya Sycle (tanpa topik) tetap memakai
+        # query apa adanya seperti sebelumnya.
+        query_text = f"query: {query}" if topics else query
+
         query_embedding = self.embedding_model.encode(
-            f"query: {query}",
+            query_text,
             normalize_embeddings=True
         ).tolist()
 
@@ -170,8 +187,11 @@ class HybridRetriever:
 
                 record = self.records[i]
 
-                # Samakan filter kategori dengan vector search.
+                # Samakan filter kategori dan peran dengan vector search.
                 if not matches_topik(record.get("metadata"), topics):
+                    continue
+
+                if not matches_peran(record.get("metadata"), where):
                     continue
 
                 bm25_ids.append(record["id"])

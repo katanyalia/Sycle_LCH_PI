@@ -42,8 +42,15 @@ function bersihkanRingkasan(summary) {
     return null;
   }
 
+  const facts =
+    summary.facts && typeof summary.facts === "object" ? summary.facts : {};
+
   return {
     title: String(summary.title ?? "").slice(0, 200),
+    facts: {
+      keluhan: String(facts.keluhan ?? "").slice(0, 1500),
+      situasi: String(facts.situasi ?? "").slice(0, 1500),
+    },
     intro: String(summary.intro ?? "").slice(0, 2000),
     sections: Array.isArray(summary.sections)
       ? summary.sections.slice(0, 10).map((section) => ({

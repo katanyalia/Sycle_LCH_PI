@@ -187,6 +187,8 @@ def build_chunk_records(
                     "document_date": doc.get("publication_year"),
                     "verified_by": doc.get("verified_by"),
                     "peran": doc.get("sycle_role"),
+                    # Topik dari kolom "Topik usulan" registry; dipakai filter Refleksi.
+                    "topik": doc.get("proposed_topic"),
                     "source_type": "web",
                     "chunk_index": chunk_index,
                     "retrieved_at": doc.get("retrieved_at"),
@@ -220,6 +222,8 @@ def build_chunk_records(
                     "document_date": doc.get("publication_year"),
                     "verified_by": doc.get("verified_by"),
                     "peran": doc.get("sycle_role"),
+                    # Topik dari kolom "Topik usulan" registry; dipakai filter Refleksi.
+                    "topik": doc.get("proposed_topic"),
                     "source_type": "pdf",
                     "page": page_number,
                     "chunk_index": chunk_index,

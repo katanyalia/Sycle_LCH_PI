@@ -379,6 +379,7 @@ export default function HealthTrackerAssessment() {
               story={story}
               snapshot={snapshot}
               aiNotice={aiNotice}
+              generatedSummary={generatedSummary}
             />
           )}
         </div>

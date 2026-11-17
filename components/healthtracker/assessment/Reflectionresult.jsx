@@ -1,6 +1,7 @@
 import {
   BookOpen,
   CheckCircle2,
+  CloudSun,
   ExternalLink,
   HeartPulse,
   Info,
@@ -77,10 +78,16 @@ export default function ReflectionResult({ data }) {
   const sections = parseSections(data?.answer ?? "");
   const find = (kw) => sections.find((s) => s.title.toLowerCase().includes(kw));
 
-  const ringkasan = find("ringkasan");
-  const iklim = find("iklim");
+  // Format baru: "Gambaran kondisi hari ini" dan "Konteks lingkungan".
+  // Format lama: "Ringkasan catatanmu" dan "Kondisi iklim saat pencatatan".
+  const ringkasan = find("gambaran") ?? find("ringkasan");
+  const iklim = find("lingkungan") ?? find("iklim");
   const saran = find("saran");
-  const catatan = find("catatan");
+  // Judul "CATATAN" harus persis; find("catatan") juga cocok dengan
+  // "Ringkasan catatanmu" sehingga ringkasan tampil dua kali.
+  const catatan = sections.find(
+    (s) => s.title.trim().toLowerCase() === "catatan",
+  );
 
   // Section yang tidak dikenali tetap ditampilkan (kecuali "Referensi",
   // karena sudah ditampilkan lewat data.sources)
@@ -93,16 +100,27 @@ export default function ReflectionResult({ data }) {
 
   return (
     <div className="space-y-6">
-      {/* Ringkasan + kondisi iklim (satu kartu, teks saja) */}
-      {(ringkasan || iklim) && (
+      {/* Gambaran kondisi hari ini */}
+      {ringkasan && (
         <section className="rounded-2xl bg-gradient-to-br from-rose-50 to-pink-50 p-4 ring-1 ring-rose-100">
           <SectionHeading icon={HeartPulse} tone="rose">
-            {ringkasan?.title ?? iklim.title}
+            {ringkasan.title}
           </SectionHeading>
-          <div className="space-y-3 text-sm leading-relaxed text-slate-700">
-            {ringkasan && <p>{renderInline(ringkasan.body)}</p>}
-            {iklim && <p>{renderInline(iklim.body)}</p>}
-          </div>
+          <p className="text-sm leading-relaxed text-slate-700">
+            {renderInline(ringkasan.body)}
+          </p>
+        </section>
+      )}
+
+      {/* Konteks lingkungan */}
+      {iklim && (
+        <section className="rounded-2xl bg-sky-50/60 p-4 ring-1 ring-sky-100">
+          <SectionHeading icon={CloudSun} tone="sky">
+            {iklim.title}
+          </SectionHeading>
+          <p className="text-sm leading-relaxed text-slate-700">
+            {renderInline(iklim.body)}
+          </p>
         </section>
       )}
 
@@ -214,18 +232,8 @@ export default function ReflectionResult({ data }) {
         </section>
       )}
 
-      {/* Catatan / disclaimer */}
-      {catatan && (
-        <aside className="flex gap-3 rounded-xl border border-amber-200 bg-amber-50 p-3.5">
-          <Info className="mt-0.5 h-5 w-5 shrink-0 text-amber-600" />
-          <div>
-            <p className="text-sm font-semibold text-amber-900">{catatan.title}</p>
-            <p className="mt-0.5 text-sm leading-relaxed text-amber-800">
-              {renderInline(catatan.body)}
-            </p>
-          </div>
-        </aside>
-      )}
+      {/* Catatan / disclaimer dari AI tidak ditampilkan: sudah diwakili
+          kotak "Catatan Penting" di bawah hasil refleksi. */}
     </div>
   );
 }

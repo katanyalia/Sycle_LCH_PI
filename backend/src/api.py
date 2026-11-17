@@ -178,50 +178,60 @@ def chat(payload: ChatRequest):
 # QUERY BUILDER
 # =========================================================
 
+# Kode jawaban Health Tracker -> kata kunci Inggris, karena evidence
+# sebagian besar berbahasa Inggris. Kode mentah (HT-01, sangat_nyaman)
+# tidak ada di teks evidence sehingga hanya menjadi noise pencarian.
+KATA_KUNCI_KONDISI = {
+    "kehamilan": "pregnancy pregnant women heat",
+    "hamil": "pregnancy pregnant women heat",
+    "menstruasi": "menstruation menstrual period heat",
+    "menyusui": "breastfeeding lactation hot weather",
+}
+
+KATA_KUNCI_JAWABAN = {
+    "sakit_kepala": "headache",
+    "pusing": "dizziness",
+    "mual": "nausea",
+    "lelah": "fatigue weakness tired",
+    "merasa_kepanasan": "overheating hot sweating heat",
+    "kram_otot": "muscle cramps",
+    "mata_perih": "eye irritation",
+    "batuk_tenggorokan_gatal": "cough throat irritation",
+    "sulit_tempat_sejuk": "cool place shade cooling",
+    "sulit_tempat_nyaman": "comfortable place cooling",
+    "sulit_air_minum": "drinking water hydration dehydration",
+    "akses_air_terbatas": "drinking water hydration dehydration",
+    "sulit_istirahat": "rest sleep breaks",
+    "aktivitas_berat": "strenuous physical activity exertion",
+    "lingkungan_panas": "hot environment heat",
+    "bayi_menyusu_lebih_sering": "baby feeding more often",
+    "luar_ruangan": "outdoors outside",
+    "perjalanan": "travel commuting outside",
+    "lebih_2_jam": "prolonged outdoor exposure",
+    "1_2_jam": "outdoor exposure",
+}
+
+
 def query_kesehatan_catatan(c: Catatan) -> str:
     """Menyusun query untuk pencarian evidence kesehatan."""
 
     bagian = [
-        c.kondisi,
-        *c.gejala,
+        KATA_KUNCI_KONDISI.get(c.kondisi.strip().lower(), c.kondisi),
     ]
 
-    # Jawaban asli kuesioner
-    for key, value in c.answers.items():
-        bagian.append(str(key))
-
+    nilai = list(c.gejala)
+    for value in c.answers.values():
         if isinstance(value, list):
-            bagian.extend(
-                str(item) for item in value
-            )
-
+            nilai.extend(str(item) for item in value)
         elif value is not None:
-            bagian.append(str(value))
+            nilai.append(str(value))
 
-    # Skor tingkat gangguan
-    for key, value in c.scores.items():
-        bagian.append(str(key))
-        bagian.append(f"tingkat gangguan {value}")
+    for kode in nilai:
+        kata = KATA_KUNCI_JAWABAN.get(kode)
+        if kata and kata not in bagian:
+            bagian.append(kata)
 
-    # Ringkasan terstruktur, tanpa bagian lingkungan
-    summary = c.generatedSummary or {}
-
-    if summary.get("intro"):
-        bagian.append(summary["intro"])
-
-    for section in summary.get("sections", []):
-        title = section.get("title", "").upper()
-
-        if "LINGKUNGAN" in title or "IKLIM" in title:
-            continue
-
-        if title:
-            bagian.append(title)
-
-        for content in section.get("content", []):
-            bagian.append(str(content))
-
-    # Cerita pribadi
+    # Cerita pribadi tetap ikut sebagai konteks pengguna.
     if c.cerita.strip():
         bagian.append(c.cerita.strip())
 

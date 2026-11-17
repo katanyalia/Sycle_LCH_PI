@@ -83,570 +83,418 @@ function getValidScoredOptions(options = []) {
     }));
 }
 
-// Membuat narasi tingkat gangguan untuk gejala atau situasi.
-function buildImpactNarrative(
-  options = [],
-  {
-    subject = "kondisi",
-    activityWord = "mengganggu",
-  } = {}
-) {
-  const scored = getValidScoredOptions(options);
+// ==========================================
+// NARASI RINGKASAN
+// Ringkasan ditulis sebagai satu paragraf yang mengalir: kalimat dihubungkan
+// dengan kata sambung, tanpa menambah makna dan tanpa menghubungkan keluhan
+// dengan kondisi lingkungan sebagai sebab-akibat.
+// ==========================================
 
-  if (!scored.length) return "";
+const ORDINALS = [
+  "", "pertama", "kedua", "ketiga", "keempat", "kelima", "keenam", "ketujuh",
+  "kedelapan", "kesembilan", "kesepuluh", "kesebelas", "kedua belas",
+  "ketiga belas", "keempat belas",
+];
 
-  const highestScore = Math.max(
-    ...scored.map((item) => item.score)
-  );
+const SKIP = "tidak_ingin_menjawab";
 
-  const highestItems = scored.filter(
-    (item) => item.score === highestScore
-  );
-
-  const otherItems = scored.filter(
-    (item) => item.score !== highestScore
-  );
-
-  const highestLabels = formatList(
-    highestItems.map((item) => item.label.toLowerCase())
-  );
-
-  if (highestScore === 0) {
-    return `${subject} yang kamu catat meliputi ${formatList(
-      scored.map((item) => item.label.toLowerCase())
-    )}. Seluruhnya tidak ${activityWord} aktivitasmu.`;
-  }
-
-  if (otherItems.length === 0) {
-    return `${subject} yang kamu catat meliputi ${formatList(
-      scored.map((item) => item.label.toLowerCase())
-    )}. Seluruhnya ${highestItems[0].scoreLabel.toLowerCase()} ${activityWord} aktivitasmu.`;
-  }
-
-  const otherDescriptions = otherItems.map(
-    (item) =>
-      `${item.label.toLowerCase()} (${item.scoreLabel.toLowerCase()})`
-  );
-
-  return `${highestLabels} menjadi ${subject} yang paling ${activityWord} aktivitasmu, dengan tingkat ${highestItems[0].scoreLabel.toLowerCase()}. ${formatList(
-    otherDescriptions
-  )} juga kamu catat dengan tingkat gangguan yang berbeda.`;
+function lower(text) {
+  return cleanText(text).toLowerCase();
 }
 
-// ==========================================
-// 1. KONDISI TUBUH
-// ==========================================
+function capitalize(text) {
+  const value = cleanText(text);
+  return value ? value.charAt(0).toUpperCase() + value.slice(1) : "";
+}
 
-function buildBodyNarrative(answers, scores, condition) {
-  const paragraphs = [];
+function sentence(text) {
+  const value = capitalize(text);
+  if (!value) return "";
+  return /[.!?]$/.test(value) ? value : `${value}.`;
+}
 
-  const comfort = getAnswer(
-    "HT-01",
-    answers,
-    scores,
-    condition
-  );
+function formatNumber(value) {
+  const number = Number(value);
+  if (!Number.isFinite(number)) return "";
+  return number.toLocaleString("id-ID", { maximumFractionDigits: 1 });
+}
 
-  if (comfort?.value) {
-    if (comfort.rawValue === "tidak_ingin_menjawab") {
-      paragraphs.push(
-        "Kamu memilih untuk tidak menjawab pertanyaan mengenai kenyamanan tubuh hari ini."
-      );
+// ---------- Pembuka: kondisi + hari menstruasi + rasa nyaman ----------
+function buildOpening(condition, answers, scores) {
+  const comfort = getAnswer("HT-01", answers, scores, condition);
+  const comfortText =
+    comfort?.value && comfort.rawValue !== SKIP
+      ? `merasa ${lower(comfort.value)}`
+      : "";
+
+  let base = "";
+
+  if (condition === "menstruasi") {
+    const day = getAnswer("HM-02", answers, scores, condition);
+    const match = day?.rawValue?.match?.(/^hari_(\d+)$/);
+    const number = match ? Number(match[1]) : null;
+
+    if (number && ORDINALS[number]) {
+      base = `hari ini kamu sedang menstruasi pada hari ${ORDINALS[number]}`;
+    } else if (number) {
+      base = `hari ini kamu sedang menstruasi pada hari ke-${number}`;
+    } else if (day?.rawValue === "tidak_yakin") {
+      base = "hari ini kamu sedang menstruasi, meski belum yakin hari keberapa";
     } else {
-      paragraphs.push(
-        `Hari ini kamu merasa ${comfort.value.toLowerCase()}.`
-      );
+      base = "hari ini kamu sedang menstruasi";
     }
+  } else if (condition === "kehamilan") {
+    base = "hari ini kamu sedang hamil";
+  } else if (condition === "menyusui") {
+    const feeding = getAnswer("HS-01", answers, scores, condition);
+    if (feeding?.rawValue === "ya") {
+      base = "hari ini kamu menyusui atau memompa ASI";
+    } else if (feeding?.rawValue === "tidak") {
+      base = "hari ini kamu tidak menyusui atau memompa ASI";
+    } else {
+      base = "hari ini kamu sedang dalam masa menyusui";
+    }
+  } else if (comfortText) {
+    return sentence(`hari ini kamu ${comfortText}`);
+  } else {
+    return "";
   }
 
-  const symptoms = getAnswer(
-    "HT-02",
-    answers,
-    scores,
-    condition
-  );
+  return sentence(comfortText ? `${base} dan ${comfortText}` : base);
+}
 
-  if (!symptoms) return paragraphs;
+// ---------- Keluhan (HT-02 + skala HT-03) ----------
+function describeGroup(items) {
+  return formatList(items.map((item) => lower(item.label)));
+}
+
+// "kram otot dan mual sedikit mengganggu, serta pusing tidak mengganggu":
+// item dengan tingkat gangguan yang sama digabung agar tidak berulang.
+function describeByLevel(items) {
+  const groups = [];
+  [...items]
+    .sort((a, b) => b.score - a.score)
+    .forEach((item) => {
+      const group = groups.find((g) => g.score === item.score);
+      if (group) group.items.push(item);
+      else groups.push({ score: item.score, label: item.scoreLabel, items: [item] });
+    });
+
+  const parts = groups.map(
+    (group) => `${describeGroup(group.items)} ${lower(group.label)}`
+  );
+  if (parts.length <= 1) return parts.join("");
+  return `${parts.slice(0, -1).join(", ")}, serta ${parts[parts.length - 1]}`;
+}
+
+function buildSymptoms(condition, answers, scores) {
+  const symptoms = getAnswer("HT-02", answers, scores, condition);
+  if (!symptoms) return "";
 
   if (isExclusiveAnswer(symptoms)) {
-    paragraphs.push(
-      "Hari ini kamu tidak mencatat gejala yang ingin dimasukkan dalam check-in."
-    );
-
-    return paragraphs;
+    return "Kamu tidak mencatat keluhan tubuh pada check-in ini.";
   }
 
-  const scored = getValidScoredOptions(
-    symptoms.scoredOptions
-  );
+  const scored = getValidScoredOptions(symptoms.scoredOptions);
+  const unscored = (symptoms.scoredOptions || [])
+    .filter((item) => item?.label && !item.scoreAnswered)
+    .map((item) => ({ label: cleanText(item.label) }));
+
+  const parts = [];
 
   if (scored.length > 0) {
-    const highestScore = Math.max(
-      ...scored.map((item) => Number(item.score))
-    );
+    const highest = Math.max(...scored.map((item) => item.score));
+    const main = scored.filter((item) => item.score === highest);
+    const rest = scored.filter((item) => item.score < highest);
+    const mainLabel = lower(main[0].scoreLabel);
 
-    const mainSymptoms = scored.filter(
-      (item) => Number(item.score) === highestScore
-    );
-
-    const otherSymptoms = scored.filter(
-      (item) => Number(item.score) < highestScore
-    );
-
-    const mainLabels = mainSymptoms.map(
-      (item) => item.label.toLowerCase()
-    );
-
-    const mainScoreLabel =
-      mainSymptoms[0]?.scoreLabel?.toLowerCase() ?? "";
-
-    paragraphs.push(
-      `${mainSymptoms.length > 1 ? "Keluhan yang paling mengganggu" : "Keluhan yang paling mengganggu aktivitasmu"} adalah ${formatList(mainLabels)}, dengan tingkat gangguan ${mainScoreLabel}.`
-    );
-
-    if (otherSymptoms.length > 0) {
-      const otherLabels = otherSymptoms.map(
-        (item) =>
-          `${item.label.toLowerCase()} (${item.scoreLabel.toLowerCase()})`
+    if (highest === 0) {
+      parts.push(
+        `kamu merasakan ${describeGroup(scored)}, tetapi ${
+          scored.length > 1 ? "semuanya" : "keluhan ini"
+        } tidak mengganggu aktivitasmu`
       );
+    } else {
+      // "Paling terasa" hanya dipakai jika keluhan teratas memang menonjol
+      // (minimal cukup mengganggu dan tidak lebih dari dua keluhan).
+      const standsOut = highest >= 2 && main.length <= 2;
+      const both = main.length > 1 ? "sama-sama " : "";
+      let text = standsOut
+        ? `${describeGroup(main)} menjadi keluhan yang paling terasa dan ${both}${mainLabel} aktivitas`
+        : `${describeGroup(main)} ${mainLabel} aktivitas`;
 
-      paragraphs.push(
-        `Selain itu, kamu juga mencatat keluhan lain, yaitu ${formatList(otherLabels)}.`
-      );
+      if (rest.length > 0) {
+        const sameLevel = rest.every((item) => item.score === rest[0].score);
+        const restVerb = rest.length > 1 ? "" : "rasa ";
+        if (sameLevel) {
+          const level = lower(rest[0].scoreLabel);
+          const only = rest[0].score > 0 ? "hanya " : "";
+          text += `, sementara ${restVerb}${describeGroup(rest)} ${only}${level}`;
+        } else {
+          text += `, sementara ${describeByLevel(rest)}`;
+        }
+      }
+
+      parts.push(text);
     }
   } else if (symptoms.value) {
-    paragraphs.push(
-      `Hari ini kamu mencatat ${symptoms.value.toLowerCase()} sebagai hal yang dirasakan.`
-    );
+    parts.push(`kamu merasakan ${lower(symptoms.value)}`);
   }
 
-  const unscored = symptoms.scoredOptions.filter(
-    (item) => !item.scoreAnswered
-  );
+  let result = parts.map(sentence).join(" ");
 
   if (unscored.length > 0 && scored.length > 0) {
-    paragraphs.push(
-      `Tingkat gangguan untuk ${formatList(
-        unscored.map((item) => item.label.toLowerCase())
-      )} belum dicatat.`
-    );
+    result += ` ${sentence(`kamu juga merasakan ${describeGroup(unscored)}`)}`;
   }
 
   if (symptoms.other) {
-    paragraphs.push(
-      `Kamu juga menambahkan catatan keluhan lainnya: ${symptoms.other}.`
-    );
+    result += ` ${sentence(`kamu juga menambahkan keluhan lain: ${symptoms.other.replace(/[.!?]+$/, "")}`)}`;
   }
 
-  return paragraphs;
+  return result.trim();
 }
 
-// ==========================================
-// 2. AKTIVITAS HARIAN
-// ==========================================
+// ---------- Aktivitas (HT-04) + lama di luar ruangan (HT-05) ----------
+function buildActivity(condition, answers, scores) {
+  const activity = getAnswer("HT-04", answers, scores, condition)?.rawValue;
+  const duration = getAnswer("HT-05", answers, scores, condition)?.rawValue;
 
-function buildActivityNarrative(answers, scores, condition) {
-  const paragraphs = [];
-
-  const activity = getAnswer(
-    "HT-04",
-    answers,
-    scores,
-    condition
-  );
-
-  const activityDescriptions = {
+  const where = {
     dalam_ruangan: "lebih banyak beraktivitas di dalam ruangan",
     luar_ruangan: "lebih banyak beraktivitas di luar ruangan",
-    perjalanan: "lebih banyak beraktivitas dalam perjalanan",
-    berpindah_pindah: "beraktivitas dengan berpindah-pindah tempat",
-  };
+    perjalanan: "lebih banyak berada di perjalanan",
+    berpindah_pindah: "banyak berpindah-pindah tempat",
+  }[activity];
 
-  if (activity?.rawValue) {
-    const description =
-      activityDescriptions[activity.rawValue];
+  const howLong = {
+    kurang_30: "kurang dari 30 menit",
+    "30_60": "sekitar 30–60 menit",
+    "1_2_jam": "sekitar 1–2 jam",
+    lebih_2_jam: "lebih dari 2 jam",
+  }[duration];
 
-    if (description) {
-      paragraphs.push(`Hari ini kamu ${description}.`);
-    }
+  if (!where && !duration) return "";
+
+  if (!where) {
+    if (duration === "tidak") return "Kamu tidak berada di luar ruangan hari ini.";
+    if (duration === "tidak_yakin") return "Kamu belum yakin berapa lama berada di luar ruangan hari ini.";
+    return howLong ? `Kamu menghabiskan ${howLong} di luar ruangan.` : "";
   }
 
-  const duration = getAnswer(
-    "HT-05",
-    answers,
-    scores,
-    condition
-  );
-
-  if (duration?.rawValue) {
-    const durationDescriptions = {
-      tidak: "tidak berada di luar ruangan",
-      kurang_30: "kurang dari 30 menit",
-      "30_60": "30–60 menit",
-      "1_2_jam": "1–2 jam",
-      lebih_2_jam: "lebih dari 2 jam",
-      tidak_yakin: "belum yakin mengenai durasinya",
-    };
-
-    const description =
-      durationDescriptions[duration.rawValue];
-
-    if (description) {
-      if (duration.rawValue === "tidak") {
-        paragraphs.push(
-          "Kamu mencatat tidak berada di luar ruangan hari ini."
-        );
-      } else if (duration.rawValue === "tidak_yakin") {
-        paragraphs.push(
-          "Kamu belum yakin berapa lama berada di luar ruangan hari ini."
-        );
-      } else {
-        paragraphs.push(
-          `Total waktu yang kamu catat untuk berada di luar ruangan sekitar ${description}.`
-        );
-      }
-    }
+  if (duration === "tidak") {
+    return sentence(`kamu ${where} dan tidak berada di luar ruangan`);
   }
-
-  return paragraphs;
+  if (duration === "tidak_yakin") {
+    return sentence(`kamu ${where}, meski belum yakin berapa lama berada di luar ruangan`);
+  }
+  if (howLong) {
+    if (activity === "luar_ruangan") {
+      return sentence(`kamu ${where}, ${howLong}`);
+    }
+    return sentence(`kamu ${where} dan menghabiskan ${howLong} di luar ruangan`);
+  }
+  return sentence(`kamu ${where}`);
 }
 
-// ==========================================
-// 3. KONTEKS MENSTRUASI
-// ==========================================
+// ---------- Menstruasi (HM-03, HM-04, HM-05, HM-06) ----------
+function buildMenstruation(answers, scores) {
+  const condition = "menstruasi";
+  const flow = getAnswer("HM-03", answers, scores, condition);
+  const discomfort = getAnswer("HM-04", answers, scores, condition)?.rawValue;
+  const pain = getAnswer("HM-05", answers, scores, condition);
+  const toilet = getAnswer("HM-06", answers, scores, condition)?.rawValue;
 
-function buildMenstruationNarrative(
-  answers,
-  scores,
-  condition
-) {
-  const paragraphs = [];
+  const clauses = [];
 
-  const day = getAnswer(
-    "HM-02",
-    answers,
-    scores,
-    condition
-  );
-
-  const flow = getAnswer(
-    "HM-03",
-    answers,
-    scores,
-    condition
-  );
-
-  const discomfort = getAnswer(
-    "HM-04",
-    answers,
-    scores,
-    condition
-  );
-
-  const pain = getAnswer(
-    "HM-05",
-    answers,
-    scores,
-    condition
-  );
-
-  const toilet = getAnswer(
-    "HM-06",
-    answers,
-    scores,
-    condition
-  );
-
-  const details = [];
-
-  if (day?.rawValue) {
-    const dayMatch = day.rawValue.match(/^hari_(\d+)$/);
-
-    if (dayMatch) {
-      details.push(`berada pada hari ke-${dayMatch[1]} menstruasi`);
-    } else if (day.rawValue === "tidak_yakin") {
-      details.push("belum yakin hari keberapa menstruasimu saat ini");
-    }
+  if (flow?.value && flow.rawValue !== SKIP) {
+    clauses.push(`darah menstruasi keluar dalam jumlah ${lower(flow.value)}`);
   }
 
-  if (
-    flow?.rawValue &&
-    flow.rawValue !== "tidak_ingin_menjawab"
-  ) {
-    details.push(
-      `jumlah darah menstruasi yang kamu catat tergolong ${flow.value.toLowerCase()}`
-    );
+  let hasPain = false;
+  if (discomfort === "ya") {
+    hasPain = true;
+    const painText = pain?.value
+      ? `nyeri haid yang ${lower(pain.value)}`
+      : "nyeri atau ketidaknyamanan saat haid";
+    clauses.push(clauses.length ? `disertai ${painText}` : `kamu merasakan ${painText}`);
+  } else if (discomfort === "tidak") {
+    clauses.push(clauses.length ? "tanpa nyeri haid" : "kamu tidak merasakan nyeri haid");
   }
 
-  if (details.length > 0) {
-    paragraphs.push(`Saat ini kamu ${details.join(" dan ")}.`);
-  }
+  const toiletText = {
+    mudah: "akses ke toilet dan tempat mengganti pembalut mudah",
+    cukup: "akses ke toilet dan tempat mengganti pembalut cukup mudah",
+    sulit: "akses ke toilet dan tempat mengganti pembalut sulit",
+  }[toilet];
 
-  if (discomfort?.rawValue === "ya") {
-    if (pain?.value) {
-      paragraphs.push(
-        `Kamu juga melaporkan nyeri atau ketidaknyamanan terkait menstruasi yang ${pain.value.toLowerCase()} aktivitasmu.`
-      );
+  let text = clauses.join(", ");
+
+  if (toiletText) {
+    if (!text) {
+      text = toiletText;
     } else {
-      paragraphs.push(
-        "Kamu juga melaporkan nyeri atau ketidaknyamanan terkait menstruasi."
-      );
-    }
-  } else if (discomfort?.rawValue === "tidak") {
-    paragraphs.push(
-      "Kamu tidak mencatat nyeri atau ketidaknyamanan terkait menstruasi pada check-in ini."
-    );
-  }
-
-  if (toilet?.rawValue) {
-    const toiletDescriptions = {
-      mudah: "mudah",
-      cukup: "cukup mudah",
-      sulit: "sulit",
-      tidak_ingin_menjawab: "tidak ingin menjawab",
-    };
-
-    const description =
-      toiletDescriptions[toilet.rawValue];
-
-    if (description === "tidak ingin menjawab") {
-      paragraphs.push(
-        "Kamu memilih untuk tidak menjawab pertanyaan mengenai akses toilet atau tempat mengganti pembalut."
-      );
-    } else if (description) {
-      paragraphs.push(
-        `Aksesmu terhadap toilet atau tempat mengganti pembalut hari ini tergolong ${description}.`
-      );
+      const contrast = hasPain && toilet !== "sulit";
+      text += contrast ? `, tetapi ${toiletText}` : `, dan ${toiletText}`;
     }
   }
 
-  return paragraphs;
+  return text ? sentence(text) : "";
 }
 
-// ==========================================
-// 4. KONTEKS KEHAMILAN
-// ==========================================
+// ---------- Kehamilan (HK-01 + skala HK-02) ----------
+function buildPregnancy(answers, scores) {
+  const condition = "kehamilan";
+  const situation = getAnswer("HK-01", answers, scores, condition);
+  if (!situation) return "";
 
-function buildPregnancyNarrative(
-  answers,
-  scores,
-  condition
-) {
-  const paragraphs = [];
-
-  const circumstances = getAnswer(
-    "HK-01",
-    answers,
-    scores,
-    condition
-  );
-
-  if (!circumstances) return paragraphs;
-
-  if (isExclusiveAnswer(circumstances)) {
-    paragraphs.push(
-      "Kamu tidak mencatat situasi khusus yang dialami selama beraktivitas hari ini."
-    );
-
-    return paragraphs;
+  if (isExclusiveAnswer(situation)) {
+    return "Selama beraktivitas, kamu tidak mencatat situasi khusus.";
   }
 
-  const scored = getValidScoredOptions(
-    circumstances.scoredOptions
-  );
+  const scored = getValidScoredOptions(situation.scoredOptions);
+  let text = "";
 
   if (scored.length > 0) {
-    paragraphs.push(
-      buildImpactNarrative(circumstances.scoredOptions, {
-        subject: "situasi",
-        activityWord: "memengaruhi",
-      })
-    );
-  } else if (circumstances.value) {
-    paragraphs.push(
-      `Selama beraktivitas hari ini, kamu mencatat beberapa situasi, yaitu ${circumstances.value.toLowerCase()}.`
-    );
-  }
+    const highest = Math.max(...scored.map((item) => item.score));
+    const main = scored.filter((item) => item.score === highest);
+    const rest = scored.filter((item) => item.score < highest);
 
-  const unscored = circumstances.scoredOptions.filter(
-    (item) => !item.scoreAnswered
-  );
-
-  if (unscored.length > 0 && scored.length > 0) {
-    paragraphs.push(
-      `Tingkat pengaruh ${formatList(
-        unscored.map((item) => item.label.toLowerCase())
-      )} terhadap aktivitasmu belum dicatat.`
-    );
-  }
-
-  if (circumstances.other) {
-    paragraphs.push(
-      `Kamu juga memberikan catatan tambahan: ${circumstances.other}.`
-    );
-  }
-
-  return paragraphs;
-}
-
-// ==========================================
-// 5. KONTEKS MENYUSUI
-// ==========================================
-
-function buildBreastfeedingNarrative(
-  answers,
-  scores,
-  condition
-) {
-  const paragraphs = [];
-
-  const breastfeeding = getAnswer(
-    "HS-01",
-    answers,
-    scores,
-    condition
-  );
-
-  if (breastfeeding?.rawValue === "ya") {
-    paragraphs.push(
-      "Hari ini kamu menyusui atau memompa ASI."
-    );
-  } else if (breastfeeding?.rawValue === "tidak") {
-    paragraphs.push(
-      "Hari ini kamu tidak menyusui atau memompa ASI."
-    );
-  }
-
-  const discomfort = getAnswer(
-    "HS-02",
-    answers,
-    scores,
-    condition
-  );
-
-  if (discomfort?.rawValue === "ya") {
-    const severity = getAnswer(
-      "HS-03",
-      answers,
-      scores,
-      condition
-    );
-
-    if (severity?.value) {
-      paragraphs.push(
-        `Kamu melaporkan ketidaknyamanan saat menyusui atau memompa ASI yang ${severity.value.toLowerCase()} aktivitasmu.`
-      );
+    if (highest === 0) {
+      text = `selama beraktivitas kamu mengalami ${describeGroup(scored)}, tetapi tidak memengaruhi aktivitasmu`;
     } else {
-      paragraphs.push(
-        "Kamu melaporkan ketidaknyamanan saat menyusui atau memompa ASI."
-      );
+      const standsOut = highest >= 2 && main.length <= 2;
+      text = standsOut
+        ? `selama beraktivitas, ${describeGroup(main)} menjadi situasi yang paling terasa dan ${lower(main[0].scoreLabel)} aktivitasmu`
+        : `selama beraktivitas, ${describeGroup(main)} ${lower(main[0].scoreLabel)} aktivitasmu`;
+      if (rest.length > 0) {
+        const sameLevel = rest.every((item) => item.score === rest[0].score);
+        text += sameLevel
+          ? `, sementara ${describeGroup(rest)} ${rest[0].score > 0 ? "hanya " : ""}${lower(rest[0].scoreLabel)}`
+          : `, sementara ${describeByLevel(rest)}`;
+      }
     }
-  } else if (discomfort?.rawValue === "tidak") {
-    paragraphs.push(
-      "Kamu tidak mencatat ketidaknyamanan saat menyusui atau memompa ASI."
-    );
+  } else if (situation.value) {
+    text = `selama beraktivitas kamu mengalami ${lower(situation.value)}`;
   }
 
-  const circumstances = getAnswer(
-    "HS-04",
-    answers,
-    scores,
-    condition
+  let result = sentence(text);
+  if (situation.other) {
+    result += ` ${sentence(`kamu juga mencatat: ${situation.other.replace(/[.!?]+$/, "")}`)}`;
+  }
+  return result.trim();
+}
+
+// ---------- Menyusui (HS-02, HS-03, HS-04) ----------
+const BREASTFEEDING_SITUATIONS = {
+  lingkungan_panas: "lingkungan terasa panas",
+  bayi_menyusu_lebih_sering: "bayi menyusu lebih sering dari biasanya",
+  sulit_istirahat: "kamu sulit beristirahat",
+  sulit_tempat_nyaman: "kamu sulit mendapat tempat yang nyaman",
+  akses_air_terbatas: "akses air minum terbatas",
+};
+
+function buildBreastfeeding(answers, scores) {
+  const condition = "menyusui";
+  const discomfort = getAnswer("HS-02", answers, scores, condition)?.rawValue;
+  const severity = getAnswer("HS-03", answers, scores, condition);
+  const circumstances = getAnswer("HS-04", answers, scores, condition);
+
+  const parts = [];
+
+  if (discomfort === "ya") {
+    parts.push(
+      severity?.value
+        ? `kamu merasakan ketidaknyamanan saat menyusui atau memompa ASI yang ${lower(severity.value)} aktivitasmu`
+        : "kamu merasakan ketidaknyamanan saat menyusui atau memompa ASI"
+    );
+  } else if (discomfort === "tidak") {
+    parts.push("menyusui atau memompa ASI berjalan tanpa rasa tidak nyaman");
+  }
+
+  if (circumstances && !isExclusiveAnswer(circumstances)) {
+    const raw = Array.isArray(circumstances.rawValue)
+      ? circumstances.rawValue
+      : [circumstances.rawValue].filter(Boolean);
+    const items = raw.map((value) => BREASTFEEDING_SITUATIONS[value]).filter(Boolean);
+    if (items.length) parts.push(`selama menyusui atau memompa ASI, ${formatList(items)}`);
+  }
+
+  let result = parts.map(sentence).join(" ");
+  if (circumstances?.other) {
+    result += ` ${sentence(`kamu juga mencatat: ${circumstances.other.replace(/[.!?]+$/, "")}`)}`;
+  }
+  return result.trim();
+}
+
+// ---------- Lingkungan ----------
+function heatIndexCategory(value) {
+  if (value < 27) return "risiko rendah";
+  if (value < 32) return "waspada";
+  if (value < 40) return "sangat waspada";
+  if (value < 52) return "bahaya";
+  return "bahaya ekstrem";
+}
+
+function buildEnvironment(snapshot, hasComplaint) {
+  const raw = snapshot?.indicators;
+  const list = Array.isArray(raw) ? raw : Object.values(raw && typeof raw === "object" ? raw : {});
+  const ok = (item) =>
+    item && item.status !== "unavailable" && item.value !== null && item.value !== undefined && item.value !== "" &&
+    Number.isFinite(Number(item.value));
+
+  const find = (id) => list.find((item) => item?.id === id && ok(item));
+
+  const temperature = find("temperature");
+  const humidity = find("humidity");
+  const heatIndex = find("heatIndex");
+  const air = find("airQuality");
+  const uv = find("uv");
+
+  const sentences = [];
+
+  const weather = [];
+  if (temperature) weather.push(`suhu udara sekitar ${formatNumber(temperature.value)}°C`);
+  if (humidity) weather.push(`${weather.length ? "dengan " : ""}kelembapan ${formatNumber(humidity.value)}%`);
+
+  if (weather.length || heatIndex) {
+    let text = `saat itu, ${weather.join(" ")}`.replace(/,\s*$/, "");
+    if (heatIndex) {
+      const feels = `suhu terasa seperti ${formatNumber(heatIndex.value)}°C dan masuk kategori ${heatIndexCategory(Number(heatIndex.value))}`;
+      text = weather.length ? `${text}, sehingga ${feels}` : `saat itu, ${feels}`;
+    }
+    sentences.push(sentence(text));
+  }
+
+  const extra = [];
+  if (air?.category?.label) extra.push(`kualitas udara tergolong ${lower(air.category.label)}`);
+  if (uv?.category?.label) extra.push(`indeks UV ${lower(uv.category.label)}`);
+  if (extra.length) {
+    sentences.push(sentence(formatList(extra)));
+  }
+
+  if (!sentences.length) return "";
+
+  sentences.push(
+    hasComplaint
+      ? "Kondisi lingkungan ini merupakan gambaran situasi saat kamu mencatat keluhan, bukan berarti menjadi penyebab dari gejala yang kamu alami."
+      : "Kondisi lingkungan ini merupakan gambaran situasi saat kamu mencatat, bukan penilaian atas kondisi tubuhmu."
   );
 
-  if (circumstances) {
-    if (isExclusiveAnswer(circumstances)) {
-      paragraphs.push(
-        "Kamu tidak mencatat kondisi khusus selama menyusui atau memompa ASI hari ini."
-      );
-    } else if (circumstances.value) {
-      paragraphs.push(
-        `Kondisi yang kamu alami selama menyusui atau memompa ASI meliputi ${circumstances.value.toLowerCase()}.`
-      );
-    }
-
-    if (circumstances.other) {
-      paragraphs.push(
-        `Kamu juga memberikan catatan tambahan: ${circumstances.other}.`
-      );
-    }
-  }
-
-  return paragraphs;
+  return sentences.join(" ");
 }
 
 // ==========================================
-// 6. KONTEKS LINGKUNGAN
+// GENERATOR UTAMA
 // ==========================================
 
-function getEnvironmentalContext(snapshot) {
-  const rawIndicators = snapshot?.indicators;
-
-  const indicators = Array.isArray(rawIndicators)
-    ? rawIndicators
-    : Object.values(
-        rawIndicators && typeof rawIndicators === "object"
-          ? rawIndicators
-          : {}
-      );
-
-  const validIndicators = indicators.filter(
-    (item) =>
-      item &&
-      typeof item === "object" &&
-      item.status === "ok" &&
-      item.value !== null &&
-      item.value !== undefined &&
-      item.value !== ""
-  );
-
-  if (!validIndicators.length) return null;
-
-  const values = validIndicators.map((item) => {
-    const label = cleanText(item.label) || "Indikator lingkungan";
-    const value = item.value;
-    const unit = cleanText(item.unit);
-
-    return `${label}: ${value}${unit ? ` ${unit}` : ""}`;
-  });
-
-  return `Selama check-in, data lingkungan yang tercatat meliputi ${formatList(values)}. Informasi ini merupakan konteks paparan lingkungan dan bukan diagnosis atau bukti penyebab keluhan tubuh.`;
-}
-
-// ==========================================
-// 7. GENERATOR UTAMA
-// ==========================================
-
-function buildGeneralBranchNarrative(
-  condition,
-  answers,
-  scores
-) {
-  if (condition === "menstruasi") {
-    return buildMenstruationNarrative(
-      answers,
-      scores,
-      condition
-    );
-  }
-
-  if (condition === "kehamilan") {
-    return buildPregnancyNarrative(
-      answers,
-      scores,
-      condition
-    );
-  }
-
-  if (condition === "menyusui") {
-    return buildBreastfeedingNarrative(
-      answers,
-      scores,
-      condition
-    );
-  }
-
-  return [];
+// Cerita pengguna disambung ke paragraf dan ditebalkan (**...**) agar
+// terlihat bahwa kalimat itu berasal dari catatan pengguna sendiri.
+function buildStory(story) {
+  if (typeof story !== "string") return "";
+  const text = story.replace(/\*/g, "").replace(/\s+/g, " ").trim();
+  if (!text) return "";
+  const quoted = /[.!?]$/.test(text) ? text : `${text}.`;
+  return `Dalam catatanmu, kamu juga menuliskan: **"${quoted}"**`;
 }
 
 export function generateHealthTrackerSummary({
@@ -656,96 +504,46 @@ export function generateHealthTrackerSummary({
   story = "",
   snapshot = null,
 }) {
-  const conditionLabel =
-    CONDITION_LABELS[condition] || "kondisi umum";
+  const symptoms = getAnswer("HT-02", answers, scores, condition);
+  const hasComplaint = Boolean(symptoms && !isExclusiveAnswer(symptoms));
 
-  const intro = `Check-in ini menggambarkan kondisi tubuh dan aktivitasmu dalam konteks ${conditionLabel}.`;
+  const branch =
+    condition === "menstruasi"
+      ? buildMenstruation(answers, scores)
+      : condition === "kehamilan"
+        ? buildPregnancy(answers, scores)
+        : condition === "menyusui"
+          ? buildBreastfeeding(answers, scores)
+          : "";
 
-  const sections = [];
+  const symptomsText = buildSymptoms(condition, answers, scores);
 
-  // 1. Konteks tubuh
-  const bodyParagraphs = buildBodyNarrative(
-    answers,
-    scores,
-    condition
-  );
-
-  if (bodyParagraphs.length > 0) {
-    sections.push({
-      title: "KONTEKS TUBUH",
-      content: bodyParagraphs,
-    });
-  }
-
-  // 2. Aktivitas harian
-  const activityParagraphs = buildActivityNarrative(
-    answers,
-    scores,
-    condition
-  );
-
-  if (activityParagraphs.length > 0) {
-    sections.push({
-      title: "AKTIVITAS HARIAN",
-      content: activityParagraphs,
-    });
-  }
-
-  // 3. Konteks sesuai kondisi reproduksi
-  const branchParagraphs = buildGeneralBranchNarrative(
-    condition,
-    answers,
-    scores
-  );
-
-  if (branchParagraphs.length > 0) {
-    const branchTitles = {
-      menstruasi: "KONTEKS MENSTRUASI",
-      kehamilan: "KONTEKS KEHAMILAN",
-      menyusui: "KONTEKS MENYUSUI",
-    };
-
-    sections.push({
-      title: branchTitles[condition] || "KONTEKS KONDISI UMUM",
-      content: branchParagraphs,
-    });
-  }
-
-  // 4. Konteks lingkungan
-  const environmentalContext =
-    getEnvironmentalContext(snapshot);
-
-  if (environmentalContext) {
-    sections.push({
-      title: "KONTEKS LINGKUNGAN",
-      content: [environmentalContext],
-    });
-  }
-
-  // 5. Catatan pribadi
-  if (typeof story === "string" && story.trim()) {
-    sections.push({
-      title: "CATATAN PRIBADI",
-      content: [
-        "Kamu juga menambahkan catatan pribadi untuk melengkapi gambaran check-in ini.",
-      ],
-    });
-  }
-
-  // Jika belum ada jawaban tambahan
-  if (sections.length === 0) {
-    sections.push({
-      title: "INFORMASI CHECK-IN",
-      content: [
-        "Belum ada jawaban tambahan yang dicatat. Ringkasan ini hanya menggambarkan informasi yang tersedia pada check-in.",
-      ],
-    });
-  }
+  const paragraph = [
+    buildOpening(condition, answers, scores),
+    symptomsText,
+    buildActivity(condition, answers, scores),
+    branch,
+    buildStory(story),
+    buildEnvironment(snapshot, hasComplaint),
+  ]
+    .map(cleanText)
+    .filter(Boolean)
+    .join(" ");
 
   return {
     title: "Ringkasan Check-In",
-    intro,
-    sections,
+    intro:
+      paragraph ||
+      "Belum ada jawaban tambahan yang dicatat. Ringkasan ini hanya menggambarkan informasi yang tersedia pada check-in.",
+    // Ringkasan kini satu paragraf di `intro`; `sections` dibiarkan kosong agar
+    // tampilan Ringkasan, Riwayat, dan data lama tetap kompatibel.
+    sections: [],
+    // Kalimat keluhan dan situasi khusus dipakai apa adanya oleh Refleksi AI,
+    // sehingga tingkat gangguan tidak bisa berubah saat bahasanya dirapikan.
+    facts: {
+      keluhan: cleanText(symptomsText),
+      situasi: cleanText(branch),
+    },
     disclaimer:
       "Ringkasan ini menggambarkan jawaban dan konteks yang kamu catat. Informasi ini bukan diagnosis medis dan tidak menggantikan konsultasi dengan tenaga kesehatan.",
   };

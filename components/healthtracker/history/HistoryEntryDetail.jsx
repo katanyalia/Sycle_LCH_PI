@@ -1,5 +1,7 @@
 "use client";
 
+import SummaryText from "@/components/healthtracker/assessment/shared/SummaryText";
+
 import { useCallback, useEffect, useState } from "react";
 import {
   X,
@@ -216,7 +218,15 @@ function renderInlineMarkdown(text) {
   return parts;
 }
 
-function AiReflectionSection({ content }) {
+// Refleksi format baru sudah memuat gambaran kondisi, jadi ringkasan check-in
+// tanpa AI tidak perlu ditampilkan lagi.
+function isUnifiedReflection(content) {
+  return /^##\s+Gambaran kondisi/im.test(
+    typeof content === "string" ? content : ""
+  );
+}
+
+function AiReflectionSection({ content, title = "Refleksi AI SYCLE" }) {
   const reflection =
     typeof content === "string" ? content.trim() : "";
 
@@ -226,7 +236,7 @@ function AiReflectionSection({ content }) {
     <section className="rounded-2xl border border-[#EAD9F0] bg-[#FAF7FC] p-4 sm:p-5">
       <h3 className="flex items-center gap-2 text-sm font-extrabold text-[#76558A]">
         <MessageCircle size={18} />
-        Refleksi AI SYCLE
+        {title}
       </h3>
 
       {reflection ? (
@@ -646,9 +656,13 @@ export default function HistoryEntryDetail({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const checkInSummary = parseCheckInSummary(
-    detail?.record?.ringkasan_checkin
+  const unifiedReflection = isUnifiedReflection(
+    detail?.record?.refleksi_ai
   );
+
+  const checkInSummary = unifiedReflection
+    ? null
+    : parseCheckInSummary(detail?.record?.ringkasan_checkin);
 
   const loadDetail = useCallback(async () => {
     if (!recordId) return;
@@ -807,6 +821,13 @@ export default function HistoryEntryDetail({
                 </p>
               </section>
 
+              {unifiedReflection && (
+                <AiReflectionSection
+                  content={detail.record.refleksi_ai}
+                  title="Ringkasan & Refleksi"
+                />
+              )}
+
               {checkInSummary && (
                 <section className="rounded-2xl border border-[#F0DFE7] bg-white p-4 sm:p-5">
                   {/* JUDUL RINGKASAN */}
@@ -817,7 +838,7 @@ export default function HistoryEntryDetail({
                   {/* KALIMAT PEMBUKA */}
                   {checkInSummary.intro && (
                     <p className="mt-3 text-sm leading-7 text-[#514653]">
-                      {checkInSummary.intro}
+                      <SummaryText text={checkInSummary.intro} />
                     </p>
                   )}
 
@@ -883,9 +904,11 @@ export default function HistoryEntryDetail({
 
               <EnvironmentSection snapshot={detail.snapshot} />
 
-              <AiReflectionSection
-                content={detail.record.refleksi_ai}
-              />
+              {!unifiedReflection && (
+                <AiReflectionSection
+                  content={detail.record.refleksi_ai}
+                />
+              )}
 
               {detail.snapshotWarning && (
                 <p className="text-xs text-[#8A7D89]">

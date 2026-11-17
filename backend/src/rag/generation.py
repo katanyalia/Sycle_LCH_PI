@@ -1,6 +1,6 @@
 from google import genai
 import re
-import requests
+from src.rag.gemini_client import post_gemini
 import os
 
 SYSTEM_PROMPT = """
@@ -165,18 +165,13 @@ PERTANYAAN:
 
 
 def call_gemini(user_content, temperature=0.2):
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/{GEMINI_MODEL}:generateContent"
     payload = {
         "systemInstruction": {"parts": [{"text": SYSTEM_PROMPT}]},
         "contents": [{"role": "user", "parts": [{"text": user_content}]}],
         "generationConfig": {"temperature": temperature},
     }
-    # API key di header (bukan di URL) agar tidak tercatat di log.
-    response = requests.post(url, json=payload, timeout=90,
-                             headers={"Content-Type": "application/json", "x-goog-api-key": GEMINI_API_KEY})
-    if response.status_code != 200:
-        raise RuntimeError(f"Gemini HTTP {response.status_code}: {response.text[:300]}")
-    data = response.json()
+    # API key di header (bukan di URL); model cadangan dipakai bila model utama penuh.
+    data = post_gemini(payload, GEMINI_API_KEY)
     try:
         return data["candidates"][0]["content"]["parts"][0]["text"]
     except (KeyError, IndexError):

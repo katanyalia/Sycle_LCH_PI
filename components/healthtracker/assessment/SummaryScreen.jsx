@@ -1,5 +1,7 @@
 "use client";
 
+import SummaryText from "@/components/healthtracker/assessment/shared/SummaryText";
+
 import {
   Activity,
   Baby,
@@ -213,7 +215,7 @@ export default function SummaryScreen({
             {/* Kalimat pembuka */}
             {generatedSummary?.intro && (
               <p className="text-sm leading-7 text-[#746875]">
-                {generatedSummary.intro}
+                <SummaryText text={generatedSummary.intro} />
               </p>
             )}
 

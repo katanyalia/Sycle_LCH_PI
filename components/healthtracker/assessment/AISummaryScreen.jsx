@@ -1,9 +1,16 @@
 "use client";
 
-import { Sparkles, MessageCircleHeart, ShieldCheck } from "lucide-react";
+import {
+  ChevronDown,
+  Info,
+  MessageCircleHeart,
+  ShieldCheck,
+  Sparkles,
+} from "lucide-react";
 
 import SummaryScreen from "./SummaryScreen";
 import ReflectionResult from "./Reflectionresult";
+import SummaryText from "./shared/SummaryText";
 
 function SummaryCard({ icon: Icon, title, children }) {
   return (
@@ -34,8 +41,11 @@ export default function AISummaryScreen({
   story = "",
   snapshot = null,
   aiNotice = {},
+  generatedSummary = null,
 }) {
-  const messages = aiNotice;
+  const messages = aiNotice ?? {};
+  // Ringkasan tanpa AI hanya tampil sebagai cadangan jika Refleksi AI gagal.
+  const aiReady = messages.status === "answer" && Boolean(messages.answer);
 
   return (
     <section className="space-y-6">
@@ -47,42 +57,62 @@ export default function AISummaryScreen({
         </div>
 
         <h2 className="text-xl font-bold text-[#332A35]">
-          Gambaran Check-In Hari Ini
+          Ringkasan &amp; Refleksi
         </h2>
 
         <p className="mt-2 text-sm leading-relaxed text-[#746875]">
-          Berikut rangkuman aktivitas, kondisi tubuh, dan pengalaman yang kamu
-          catat hari ini, beserta refleksi AI.
+          Gambaran kondisi, konteks lingkungan, dan saran yang disusun AI dari
+          catatanmu hari ini.
         </p>
       </div>
 
-      {/* Seluruh rangkuman check-in */}
-      <SummaryScreen
-        conditionLabel={conditionLabel}
-        summaryQuestions={summaryQuestions}
-        answers={answers}
-        scores={scores}
-        condition={condition}
-        story={story}
-        snapshot={snapshot}
-        showHeader={false}
-      />
-
-      {/* Hasil Refleksi AI - bagian bawah */}
-      <SummaryCard
-        icon={MessageCircleHeart}
-        title="Hasil Refleksi AI"
-      >
-        {messages.answer ? (
-          <div className="space-y-4">
-            <ReflectionResult data={messages} />
+      {aiReady ? (
+        <SummaryCard icon={MessageCircleHeart} title="Hasil Refleksi AI">
+          <ReflectionResult data={messages} />
+        </SummaryCard>
+      ) : (
+        <>
+          <div className="flex items-start gap-3 rounded-2xl border border-[#F1E1C7] bg-[#FFF8EC] p-4 text-sm leading-6 text-[#7A5A2E]">
+            <Info size={18} className="mt-0.5 shrink-0" />
+            <p>
+              {messages.answer ||
+                "Refleksi AI belum tersedia saat ini. Ringkasan tanpa AI tetap bisa kamu simpan."}
+            </p>
           </div>
-        ) : (
-          <p>
-            Belum ada hasil refleksi yang dapat ditampilkan.
-          </p>
-        )}
-      </SummaryCard>
+
+          {generatedSummary?.intro && (
+            <SummaryCard icon={MessageCircleHeart} title="Ringkasan catatanmu">
+              <p className="leading-7">
+                <SummaryText text={generatedSummary.intro} />
+              </p>
+            </SummaryCard>
+          )}
+        </>
+      )}
+
+      {/* Jawaban asli check-in tetap bisa dibuka */}
+      <details className="group rounded-2xl border border-[#EAD8E0] bg-white p-4">
+        <summary className="flex cursor-pointer list-none items-center justify-between text-sm font-bold text-[#8E3E5E]">
+          Lihat jawaban check-in
+          <ChevronDown
+            size={18}
+            className="transition-transform group-open:rotate-180"
+          />
+        </summary>
+
+        <div className="mt-4">
+          <SummaryScreen
+            conditionLabel={conditionLabel}
+            summaryQuestions={summaryQuestions}
+            answers={answers}
+            scores={scores}
+            condition={condition}
+            story={story}
+            snapshot={snapshot}
+            showHeader={false}
+          />
+        </div>
+      </details>
 
       {/* Catatan Penting */}
       <div className="rounded-2xl border border-[#D7E6D9] bg-[#E9F2EA] p-4">
