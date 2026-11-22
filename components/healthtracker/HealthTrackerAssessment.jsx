@@ -87,6 +87,13 @@ export default function HealthTrackerAssessment() {
     prefillActivity,
   } = useHealthTrackerAssessment();
 
+  useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
+  }, [currentStep]);
+
   const {
     snapshot: liveSnapshot,
     environmentLoading,
